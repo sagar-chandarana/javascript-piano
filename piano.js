@@ -451,15 +451,44 @@
    Appbase integration begins
    */
   Appbase.credentials("sagar", "18efd689a4605210d1793d486731e285");
+  var abRef = Appbase.create('try', 'piano1');
+  var throwIfError = function(error){
+    if(error) throw Error;
+  }
+
+  var keysAlreadyPlayed = {};
+
+  var pushToAppbase = function(key) {
+    var keyUUID = Appbase.uuid();
+    keysAlreadyPlayed[keyUUID] = true;
+    var keyRef = Appbase.create('key_played', keyUUID);
+    keyRef.setData({key: key, keyUUID: keyUUID}, throwIfError);
+    abRef.setEdge(keyRef, keyUUID, throwIfError);
+  }
 
   //Mouse and keyboard events call below function.
   var triggerKey = function(key) {
     playKeyInTheView(key);
+    pushToAppbase(key);
   }
 
   // This function plays a key.
   var playKeyInTheView = function(key) {
     $keys.trigger('note-'+key+'.play');
   }
+
+  abRef.on('edge_added', function(error, edgeRef, edgeSnap) {
+    throwIfError(error);
+
+    //ignore if key is already played, play otherwise
+    if(!keysAlreadyPlayed[edgeSnap.name()]) { // edgeSnap.name equals keyUUID
+      console.log(edgeSnap.name(), keysAlreadyPlayed);
+      edgeRef.on('properties', function(error, ref, vSnap) {
+        throwIfError(error);
+        playKeyInTheView(vSnap.properties().key);
+      });
+    }
+
+  }, true); // Listen to new edges added in the ref
 
 })();
