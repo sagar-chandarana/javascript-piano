@@ -4,6 +4,7 @@
     <list default="true" id="116f26e3-0364-4498-be1c-ad8e1967f2e3" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/piano.js" afterPath="$PROJECT_DIR$/piano.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="javascript-piano.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -26,10 +27,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="piano.js" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="piano.js" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/piano.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="577" column="19" selection-start="17809" selection-end="17809" vertical-scroll-proportion="0.24031007" vertical-offset="10293" max-vertical-offset="11556">
+            <state line="264" column="0" selection-start="7886" selection-end="7886" vertical-scroll-proportion="-0.72" vertical-offset="4734" max-vertical-offset="8820">
               <folding>
                 <element signature="n#!!doc" expanded="true" />
               </folding>
@@ -37,10 +38,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="index.html" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="index.html" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="28" column="93" selection-start="1734" selection-end="1734" vertical-scroll-proportion="-3.6923077" vertical-offset="312" max-vertical-offset="1278">
+            <state line="26" column="90" selection-start="1556" selection-end="1556" vertical-scroll-proportion="0.33548388" vertical-offset="312" max-vertical-offset="1260">
               <folding />
             </state>
           </provider>
@@ -142,9 +143,9 @@
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32886904" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17261904" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24963397" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.512782" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -175,19 +176,19 @@
     <breakpoint-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="28" column="93" selection-start="1734" selection-end="1734" vertical-scroll-proportion="-3.6923077" vertical-offset="312" max-vertical-offset="1278">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/piano.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="577" column="19" selection-start="17809" selection-end="17809" vertical-scroll-proportion="0.24031007" vertical-offset="10293" max-vertical-offset="11556">
+        <state line="264" column="0" selection-start="7886" selection-end="7886" vertical-scroll-proportion="-0.72" vertical-offset="4734" max-vertical-offset="8820">
           <folding>
             <element signature="n#!!doc" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="26" column="90" selection-start="1556" selection-end="1556" vertical-scroll-proportion="0.33548388" vertical-offset="312" max-vertical-offset="1260">
+          <folding />
         </state>
       </provider>
     </entry>
