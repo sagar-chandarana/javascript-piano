@@ -448,37 +448,4 @@
         });
     }
 
-
-
-    // the below code was a failed experiment to support iOS...
-
-    // //
-    // // Generate files for dl...
-    // //
-
-    // function generateFilesForDL() {
-    //     // backup solution for iOS... since they won't play my files :'(
-    //     // add audio elts to page and then download them all!
-    //     // https://addons.mozilla.org/en-US/firefox/addon/downthemall/?src=search
-
-    //     for (var i=0; i<5; i++) {
-    //         var dataURI = Notes.getDataURI(i);
-    //         $('body').prepend("<br><br>");
-    //         $('<audio>', {controls: 'controls'})
-    //             .append('Note ' + i)
-    //             .append($('<source>', {
-    //                 src: dataURI,
-    //                 type: 'audio/wav'
-    //             }))
-    //             .prependTo('body');
-    //         $('body').prepend(i + ": ");
-    //     }
-
-    //     $('body').prepend("<br><br>");
-    //     $('<audio>', {controls: 'controls', src: 'note.caf', type: 'audio/wav'}).prependTo('body');
-    //     $('body').prepend("note: ");
-
-    // }
-    // generateFilesForDL();
-
 })();
