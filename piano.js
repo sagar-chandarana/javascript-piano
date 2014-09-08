@@ -381,12 +381,11 @@
     // button
     var bW = 20,
       bH = 20,
-      $loop = $('.loop'),
       $button = $('<canvas>', {
         css: {
           position: 'absolute',
-          top: (parseInt($loop.css('top')) + 1) + 'px',
-          right: (parseInt($loop.css('right')) + 34) + 'px',
+          top: (parseInt($help.css('top')) + 1) + 'px',
+          right: (parseInt($help.css('right')) + 34) + 'px',
           width: bW,
           height: bH,
           cursor: 'pointer'
@@ -454,7 +453,7 @@
 
   //Mouse and keyboard events call below function.
   var triggerKey = function(key) {
-    playKeyInTheView(key)
+    playKeyInTheView(key);
   }
 
   // This function plays a key.
