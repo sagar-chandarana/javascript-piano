@@ -76,7 +76,7 @@
       var $key = $('<div>', {
         'class': 'key' + blackKeyClass(i),
         'data-key': i,
-        mousedown: function(evt) { $keys.trigger('note-'+i+'.play'); }
+        mousedown: function(evt) { triggerKey(i); }
       }).appendTo($keys);
     }
 
@@ -175,7 +175,7 @@
       downKeys[keyCode] = 1;
       var key = keyNotes[keyCode];
       if (typeof key != 'undefined') {
-        $keys.trigger('note-'+(key+notesShift+notesOffset)+'.play');
+        triggerKey(key+notesShift+notesOffset);
         evt.preventDefault();
       } else if (evt.keyCode == 188) {
         notesShift = -12;
@@ -451,5 +451,15 @@
   /*
    Appbase integration begins
    */
+
+  //Mouse and keyboard events call below function.
+  var triggerKey = function(key) {
+    playKeyInTheView(key)
+  }
+
+  // This function plays a key.
+  var playKeyInTheView = function(key) {
+    $keys.trigger('note-'+key+'.play');
+  }
 
 })();
