@@ -485,7 +485,7 @@
     colors[key] = color;
     // set name
     if ($("#usernames").find("#"+name).length === 0)
-      $("#usernames").append("<li id='"+name+"' style='padding:3px 5px;float:left;background-color:"+color+";color:"+invertColor(color)+"'><b>"+name+"</b></li>");
+      $("#usernames").append("<li id='"+name+"' style='float:left;border-right: 1px solid;'><b style='margin: 2px; padding: 2px;background-color:"+color+";color:"+invertColor(color)+"'>"+name+"</b></li>");
     $keys.trigger('note-'+key+'.play');
   }
 
