@@ -450,6 +450,7 @@
   /*
    Appbase integration begins
    */
+  Appbase.credentials("sagar", "18efd689a4605210d1793d486731e285");
 
   //Mouse and keyboard events call below function.
   var triggerKey = function(key) {
