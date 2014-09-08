@@ -456,14 +456,22 @@
     if(error) throw Error;
   }
 
-  var keysAlreadyPlayed = {};
+  var keysAlreadyPlayed = {}; //keeps track of the keys already played in the client.
+
+  var encodeKey = function(key, keyUUID) {
+    return key.toString() + '_' + keyUUID;
+  }
+
+  var decodeKey = function(edgeName) {
+    edgeName = edgeName.split('_');
+    return {key: parseInt(edgeName[0]), keyUUID: edgeName[1]};
+  }
 
   var pushToAppbase = function(key) {
     var keyUUID = Appbase.uuid();
-    keysAlreadyPlayed[keyUUID] = true;
-    var keyRef = Appbase.create('key_played', keyUUID);
-    keyRef.setData({key: key, keyUUID: keyUUID}, throwIfError);
-    abRef.setEdge(keyRef, keyUUID, throwIfError);
+    keysAlreadyPlayed[keyUUID] = true; // When this UUID is received from Appbase as an edge event, we won't play it, as we already played it for this client.
+    //encoding key and uuid into edgename itself. This approach fastens the process as no extra vertex needs to be created/retrieved.
+    abRef.setEdge(abRef, encodeKey(key, keyUUID), throwIfError);
   }
 
   //Mouse and keyboard events call below function.
@@ -479,16 +487,11 @@
 
   abRef.on('edge_added', function(error, edgeRef, edgeSnap) {
     throwIfError(error);
-
+    var keyObj = decodeKey(edgeSnap.name());
     //ignore if key is already played, play otherwise
-    if(!keysAlreadyPlayed[edgeSnap.name()]) { // edgeSnap.name equals keyUUID
-      console.log(edgeSnap.name(), keysAlreadyPlayed);
-      edgeRef.on('properties', function(error, ref, vSnap) {
-        throwIfError(error);
-        playKeyInTheView(vSnap.properties().key);
-      });
+    if(!keysAlreadyPlayed[keyObj.keyUUID]) {
+      playKeyInTheView(keyObj.key);
     }
-
   }, true); // Listen to new edges added in the ref
 
 })();
