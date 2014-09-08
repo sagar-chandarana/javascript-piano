@@ -287,10 +287,6 @@
       canvas = $canvas.get(0),
       ctx = canvas.getContext('2d');
 
-    function choice(x) {
-      return x[Math.floor(Math.random()*x.length)];
-    }
-
     function getData(note) {
       var data = [], freq = Notes.noteToFreq(note), vol = 1, sampleRate = 2024, secs = .1;
       var volumeFn = DataGenerator.volume.default;
@@ -340,7 +336,7 @@
         yIncrement = yPerStep / iPerStep,
         step = 0,
         i = 0,
-        color = '#' + choice('f33 33f 3f3 ff3 f3f 3ff'.split(' '));
+        color = getColor(key);
 
       // startY -> endY in steps
       // each step is yPerStep = (endY - startY) / steps long
@@ -480,18 +476,39 @@
     pushToAppbase(key);
   }
 
+  var colors = {};
+  var getColor = function(key) {
+    return colors[key] || "#fff";
+  }
   // This function plays a key.
   var playKeyInTheView = function(key, color, name) {
+    colors[key] = color;
+    // set name
+    if ($("#usernames").find("#"+name).length === 0)
+      $("#usernames").append("<li id='"+name+"' style='padding:3px 5px;float:left;background-color:"+color+";color:"+invertColor(color)+"'><b>"+name+"</b></li>");
     $keys.trigger('note-'+key+'.play');
   }
 
-  var myColor;
-  var myName;
-  var setColorAndName = function(color, name) {
-    myColor = color;
-    myName = name;
+  function invertColor(hexTripletColor) {
+    var color = hexTripletColor;
+    color = color.substring(1);           // remove #
+    color = parseInt(color, 16);          // convert to integer
+    color = 0xFFFFFF ^ color;             // invert three bytes
+    color = color.toString(16);           // convert to hex
+    color = ("000000" + color).slice(-6); // pad with leading zeros
+    color = "#" + color;                  // prepend #
+    return color;
   }
 
+  //chooses a random color
+  function choice(x) {
+    return x[Math.floor(Math.random()*x.length)];
+  }
+
+  var myColor = '#' + choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
+  var myName = prompt("enter your handle (alphanumeric only)");
+
+  //Listening for keys from Appbase
   abRef.on('edge_added', function(error, edgeRef, edgeSnap) {
     throwIfError(error);
     var keyObj = decodeKey(edgeSnap.name());
