@@ -447,7 +447,8 @@
    Appbase integration begins
    */
   Appbase.credentials("sagar", "18efd689a4605210d1793d486731e285");
-  var abRef = Appbase.create('try', 'piano1');
+  var keysRef = Appbase.ref('try/piano1/keys');
+  var usersRef = Appbase.ref('try/piano1/users');
   var throwIfError = function(error) {
     if(error) throw Error;
   }
@@ -467,7 +468,7 @@
     var keyUUID = Appbase.uuid();
     keysAlreadyPlayed[keyUUID] = true; // When this UUID is received from Appbase as an edge event, we won't play it, as we already played it for this client.
     //encoding key and uuid into edgename itself. This approach fastens the process as no extra vertex needs to be created/retrieved.
-    abRef.setEdge(abRef, encodeKey(key, keyUUID), throwIfError);
+    keysRef.setEdge(keysRef, encodeKey(key, keyUUID), throwIfError);
   }
 
   //Mouse and keyboard events call below function.
@@ -483,13 +484,10 @@
   // This function plays a key.
   var playKeyInTheView = function(key, color, name) {
     colors[key] = color;
-    // set name
-    if ($("#usernames").find("#"+name).length === 0)
-      $("#usernames").append("<li id='"+name+"' style='float:left;border-right: 1px solid;'><b style='margin: 2px; padding: 2px;background-color:"+color+";color:"+invertColor(color)+"'>"+name+"</b></li>");
     $keys.trigger('note-'+key+'.play');
   }
 
-  function invertColor(hexTripletColor) {
+  var invertColor = function (hexTripletColor) {
     var color = hexTripletColor;
     color = color.substring(1);           // remove #
     color = parseInt(color, 16);          // convert to integer
@@ -500,16 +498,48 @@
     return color;
   }
 
+  //User name and color
+
   //chooses a random color
   function choice(x) {
     return x[Math.floor(Math.random()*x.length)];
   }
-
   var myColor = '#' + choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
-  var myName = prompt("enter your handle (alphanumeric only)");
+
+  var myName;
+  do {
+    myName = prompt("enter your handle (alphanumeric only)");
+  } while(!myName);
+  var userUUID = Appbase.uuid();
+  var userRef = Appbase.create('user', userUUID);
+  userRef.setData({name: myName, color: myColor}, throwIfError);
+  usersRef.setEdge(userRef, userUUID, throwIfError);
+
+  //Listening for users
+  usersRef.on('edge_added', function(error, edgeRef, edgeSnap) {
+    throwIfError(error);
+    edgeRef.on('properties', function(error, ref, vSnap) {
+      throwIfError(error);
+      edgeRef.off();
+      $("#usernames").append("<li id='"+edgeSnap.name()+"' style='float:left;border-right: 1px solid;'><b style='margin: 2px; padding: 2px;background-color:"+vSnap.properties().color+";color:"+invertColor(vSnap.properties().color)+"'>"+vSnap.properties().name+"</b></li>");
+    });
+  });
+  usersRef.on('edge_removed', function(error, edgeRef, edgeSnap) {
+    throwIfError(error);
+    //remove id:edgeSnap.name()
+  });
+
+  //Remove this user when tab is closed
+  $(window).bind('beforeunload', function(eventObject) {
+    var returnValue = 'Close?';
+    eventObject.returnValue = returnValue;
+    usersRef.removeEdge(userUUID, throwIfError);
+    return returnValue;
+  });
+
 
   //Listening for keys from Appbase
-  abRef.on('edge_added', function(error, edgeRef, edgeSnap) {
+  keysRef.on('edge_added', function(error, edgeRef, edgeSnap) {
     throwIfError(error);
     var keyObj = decodeKey(edgeSnap.name());
     //ignore if key is already played, play otherwise
