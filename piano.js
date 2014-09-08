@@ -476,7 +476,6 @@
 
   //Mouse and keyboard events call below function.
   var triggerKey = function(key) {
-    console.log('triggered', key)
     playKeyInTheView(key, myColor, myName);
     pushToAppbase(key);
   }
@@ -486,8 +485,8 @@
     $keys.trigger('note-'+key+'.play');
   }
 
-  var myColor = 'sagar';
-  var myName = 'red';
+  var myColor;
+  var myName;
   var setColorAndName = function(color, name) {
     myColor = color;
     myName = name;
