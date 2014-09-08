@@ -452,19 +452,19 @@
    */
   Appbase.credentials("sagar", "18efd689a4605210d1793d486731e285");
   var abRef = Appbase.create('try', 'piano1');
-  var throwIfError = function(error){
+  var throwIfError = function(error) {
     if(error) throw Error;
   }
 
   var keysAlreadyPlayed = {}; //keeps track of the keys already played in the client.
 
   var encodeKey = function(key, keyUUID) {
-    return key.toString() + '_' + keyUUID;
+    return key.toString() + '_' + keyUUID + (myColor!== undefined? '_' + myColor + '_' + myName : '');
   }
 
   var decodeKey = function(edgeName) {
     edgeName = edgeName.split('_');
-    return {key: parseInt(edgeName[0]), keyUUID: edgeName[1]};
+    return {key: parseInt(edgeName[0]), keyUUID: edgeName[1], color: edgeName[2], name: edgeName[3]};
   }
 
   var pushToAppbase = function(key) {
@@ -476,13 +476,21 @@
 
   //Mouse and keyboard events call below function.
   var triggerKey = function(key) {
-    playKeyInTheView(key);
+    console.log('triggered', key)
+    playKeyInTheView(key, myColor, myName);
     pushToAppbase(key);
   }
 
   // This function plays a key.
-  var playKeyInTheView = function(key) {
+  var playKeyInTheView = function(key, color, name) {
     $keys.trigger('note-'+key+'.play');
+  }
+
+  var myColor = 'sagar';
+  var myName = 'red';
+  var setColorAndName = function(color, name) {
+    myColor = color;
+    myName = name;
   }
 
   abRef.on('edge_added', function(error, edgeRef, edgeSnap) {
@@ -490,7 +498,7 @@
     var keyObj = decodeKey(edgeSnap.name());
     //ignore if key is already played, play otherwise
     if(!keysAlreadyPlayed[keyObj.keyUUID]) {
-      playKeyInTheView(keyObj.key);
+      playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
     }
   }, true); // Listen to new edges added in the ref
 
