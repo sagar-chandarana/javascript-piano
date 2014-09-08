@@ -526,7 +526,7 @@
   });
   usersRef.on('edge_removed', function(error, edgeRef, edgeSnap) {
     throwIfError(error);
-    //remove id:edgeSnap.name()
+    $("#"+edgeSnap.name()).remove();
   });
 
   //Remove this user when tab is closed
@@ -536,7 +536,6 @@
     usersRef.removeEdge(userUUID, throwIfError);
     return returnValue;
   });
-
 
   //Listening for keys from Appbase
   keysRef.on('edge_added', function(error, edgeRef, edgeSnap) {
