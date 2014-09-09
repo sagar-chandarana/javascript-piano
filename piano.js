@@ -177,13 +177,6 @@
       if (typeof key != 'undefined') {
         triggerKey(key+notesShift+notesOffset);
         evt.preventDefault();
-      } else if (evt.keyCode == 188) {
-        notesShift = -12;
-      } else if (evt.keyCode == 190) {
-        notesShift = 0;
-      } else if (keyCode == 37 || keyCode == 39) {
-        notesOffset += (keyCode == 37 ? -1 : 1) * 12;
-        buildPiano();
       }
     }
   }).keyup(function(evt) {
