@@ -475,21 +475,24 @@
     udpateList(edgeRef.path());
   });
 
-  var removeListeners;
+  var removeListeners, keysRef, usersRef;
   var setRoom = function(room){
     removeListeners ? removeListeners() : void 0; //Remove previous listeners before adding new ones
 
-    var keysRef = Appbase.ref(room.path() + '/keys');
-    var usersRef = Appbase.ref(room.path() + '/users');
+    keysRef = Appbase.ref(room.path() + '/keys');
+    usersRef = Appbase.ref(room.path() + '/users');
 
     keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
     usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
     usersRef.on('edge_removed', events.usersRef.edge_removed);
     usersRef.setEdge(userRef, userUUID, throwIfError);
 
+    $(window).bind('beforeunload', events.window);
+
     removeListeners = function(){
       usersRef.removeEdge(userUUID);
       $('#usernames').innerHTML = '';
+      $(window).unbind('beforeunload');
       keysRef.off();
       usersRef.off();
     }
@@ -524,6 +527,12 @@
         throwIfError(error);
         $("#"+edgeSnap.name()).remove();
       }
+    },
+    window : function(eventObject) {
+      var returnValue = 'Close?';
+      eventObject.returnValue = returnValue;
+      usersRef.removeEdge(userUUID, throwIfError);
+      return returnValue;
     }
   }
 
@@ -595,14 +604,6 @@
     color = ("000000" + color).slice(-6); // pad with leading zeros
     color = "#" + color;                  // prepend #
     return color;
-  }
-
-  //Remove this user when tab is closed
-  $(window).bind('beforeunload', function(eventObject) {
-    var returnValue = 'Close?';
-    eventObject.returnValue = returnValue;
-    usersRef.removeEdge(userUUID, throwIfError);
-    return returnValue;
-  });
+  }  
 
 })();
