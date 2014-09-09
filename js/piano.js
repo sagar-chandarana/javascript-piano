@@ -472,7 +472,7 @@
     //set user's room to first edge
     room = room || setRoom(edgeRef);
     //edgeRef is (ref)/pianoapp/piano/nonsense
-    updateList(edgeRef.path());
+    updateList(edgeSnap);
   });
 
   var removeListeners, keysRef, usersRef;
@@ -489,9 +489,11 @@
 
     $(window).bind('beforeunload', events.window);
 
+    $(document).ready(function(){$('#roomID').html(room.path());});
+
     removeListeners = function(){
       usersRef.removeEdge(userUUID);
-      $('#usernames').innerHTML = '';
+      $('#usernames').html('');
       $(window).unbind('beforeunload');
       keysRef.off();
       usersRef.off();
@@ -499,6 +501,8 @@
 
     return room;
   }
+
+  $(document).ready(function(){$('#addRoom').on('click', createRoom);});
 
   var events = {
     keyRef : {
@@ -536,10 +540,11 @@
     }
   }
 
-  var updateList = function(name){
-    $('#roomList').append('<li id="'+name+'">'+name+'</li>');
+  var updateList = function(obj){
+    var name = obj.name();
+    $('#roomList').append('<li><button id="'+name+'">'+name+'</button></li>');
     $('#' + name).on('click', function(event){
-      setRoom(Appbase.ref(event.id));
+      setRoom(Appbase.ref('pianoapp/piano/' + event.target.id));
     });
   };
 
@@ -555,10 +560,13 @@
   var createRoom = function(){
     var roomID = Appbase.uuid();
     var roomRef = Appbase.create('room', roomID);
-    roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users');
-    roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys');
-    mainRef.setEdge(roomRef, roomID);
-    return Appbase.ref(roomRef.path());
+    roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', function(){
+      roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', function(){
+        mainRef.setEdge(roomRef, roomID);
+        setRoom(roomRef);
+      });
+    });
+    //return Appbase.ref(roomRef.path());
   }
 
   var encodeKey = function(key, keyUUID) {
