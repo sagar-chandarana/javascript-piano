@@ -472,7 +472,7 @@
     //set user's room to first edge
     room = room || setRoom(edgeRef);
     //edgeRef is (ref)/pianoapp/piano/nonsense
-    udpateList(edgeRef.path());
+    updateList(edgeRef.path());
   });
 
   var removeListeners, keysRef, usersRef;
