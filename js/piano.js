@@ -484,7 +484,7 @@
 
     keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
     usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
-    usersRef.on('edge_removed', events.usersRef.edge_removed);
+    usersRef.on('edge_removed', events.usersRef.edge_removed, true);
     usersRef.setEdge(userRef, userUUID, throwIfError);
 
     $(window).bind('beforeunload', events.window);
