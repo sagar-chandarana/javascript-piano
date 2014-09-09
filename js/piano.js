@@ -439,14 +439,118 @@
   /*
    Appbase integration begins
    */
-  Appbase.credentials("sagar", "18efd689a4605210d1793d486731e285");
-  var keysRef = Appbase.ref('try/piano1/keys');
-  var usersRef = Appbase.ref('try/piano1/users');
+  Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
+  var mainRef = Appbase.ref('pianoapp/piano');
+  
+  //User name and color
+
+  //chooses a random color
+  function choice(x) {
+    return x[Math.floor(Math.random()*x.length)];
+  }
+  var myColor = '#' +
+      choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
+
+  var myName;
+  do {
+    myName = prompt("enter your handle (alphanumeric only)");
+  } while(!myName);
+  var userUUID = Appbase.uuid();
+  var userRef = Appbase.create('user', userUUID);
+  userRef.setData({name: myName, color: myColor}, throwIfError);
+
+  /*
+    asdf
+    - piano
+      - room id
+        - users
+        - keys
+  */
+
+  var room;
+  mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
+    //set user's room to first edge
+    room = room || setRoom(edgeRef);
+    //edgeRef is (ref)/pianoapp/piano/nonsense
+    udpateList(edgeRef.path());
+  });
+
+  var removeListeners;
+  var setRoom = function(room){
+    removeListeners ? removeListeners() : void 0; //Remove previous listeners before adding new ones
+
+    var keysRef = Appbase.ref(room.path() + '/keys');
+    var usersRef = Appbase.ref(room.path() + '/users');
+
+    keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
+    usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
+    usersRef.on('edge_removed', events.usersRef.edge_removed);
+    usersRef.setEdge(userRef, userUUID, throwIfError);
+
+    removeListeners = function(){
+      usersRef.removeEdge(userUUID);
+      $('#usernames').innerHTML = '';
+      keysRef.off();
+      usersRef.off();
+    }
+
+    return room;
+  }
+
+  var events = {
+    keyRef : {
+      edge_added : function (error, edgeRef, edgeSnap) {
+        throwIfError(error);
+        var keyObj = decodeKey(edgeSnap.name());
+        //ignore if key is already played, play otherwise
+        if(!keysAlreadyPlayed[keyObj.keyUUID]) {
+          playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
+        }
+      }
+    }, 
+    usersRef : {
+      edge_added : function (error, edgeRef, edgeSnap) {
+        throwIfError(error);
+        edgeRef.on('properties', function(error, ref, vSnap) {
+          throwIfError(error);
+          edgeRef.off();
+          $("#usernames").append("<li id='"+edgeSnap.name()
+          +"' style='float:left;border-right: 1px solid;'><b style='margin: 2px; padding: 2px;background-color:"
+          +vSnap.properties().color+";color:"+invertColor(vSnap.properties().color)+"'>"+vSnap.properties().name+
+          "</b></li>");
+        });
+      },
+      edge_removed : function (error, edgeRef, edgeSnap) {
+        throwIfError(error);
+        $("#"+edgeSnap.name()).remove();
+      }
+    }
+  }
+
+  var updateList = function(name){
+    $('#roomList').append('<li id="'+name+'">'+name+'</li>');
+    $('#' + name).on('click', function(event){
+      setRoom(Appbase.ref(event.id));
+    });
+  };
+
+  //old
+  // var keysRef = Appbase.ref('try/piano1/keys');
+
   var throwIfError = function(error) {
     if(error) throw Error;
   }
 
   var keysAlreadyPlayed = {}; //keeps track of the keys already played in the client.
+
+  var createRoom = function(){
+    var roomID = Appbase.uuid();
+    var roomRef = Appbase.create('room', roomID);
+    roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users');
+    roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys');
+    mainRef.setEdge(roomRef, roomID);
+    return Appbase.ref(roomRef.path());
+  }
 
   var encodeKey = function(key, keyUUID) {
     return key.toString() + '_' + keyUUID + (myColor!== undefined? '_' + myColor + '_' + myName : '');
@@ -459,8 +563,10 @@
 
   var pushToAppbase = function(key) {
     var keyUUID = Appbase.uuid();
-    keysAlreadyPlayed[keyUUID] = true; // When this UUID is received from Appbase as an edge event, we won't play it, as we already played it for this client.
-    //encoding key and uuid into edgename itself. This approach fastens the process as no extra vertex needs to be created/retrieved.
+    keysAlreadyPlayed[keyUUID] = true; /* When this UUID is received from Appbase as an edge event,
+    we won't play it, as we already played it for this client.
+    encoding key and uuid into edgename itself.
+    This approach fastens the process as no extra vertex needs to be created/retrieved.*/
     keysRef.setEdge(keysRef, encodeKey(key, keyUUID), throwIfError);
   }
 
@@ -491,37 +597,6 @@
     return color;
   }
 
-  //User name and color
-
-  //chooses a random color
-  function choice(x) {
-    return x[Math.floor(Math.random()*x.length)];
-  }
-  var myColor = '#' + choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
-
-  var myName;
-  do {
-    myName = prompt("enter your handle (alphanumeric only)");
-  } while(!myName);
-  var userUUID = Appbase.uuid();
-  var userRef = Appbase.create('user', userUUID);
-  userRef.setData({name: myName, color: myColor}, throwIfError);
-  usersRef.setEdge(userRef, userUUID, throwIfError);
-
-  //Listening for users
-  usersRef.on('edge_added', function(error, edgeRef, edgeSnap) {
-    throwIfError(error);
-    edgeRef.on('properties', function(error, ref, vSnap) {
-      throwIfError(error);
-      edgeRef.off();
-      $("#usernames").append("<li id='"+edgeSnap.name()+"' style='float:left;border-right: 1px solid;'><b style='margin: 2px; padding: 2px;background-color:"+vSnap.properties().color+";color:"+invertColor(vSnap.properties().color)+"'>"+vSnap.properties().name+"</b></li>");
-    });
-  });
-  usersRef.on('edge_removed', function(error, edgeRef, edgeSnap) {
-    throwIfError(error);
-    $("#"+edgeSnap.name()).remove();
-  });
-
   //Remove this user when tab is closed
   $(window).bind('beforeunload', function(eventObject) {
     var returnValue = 'Close?';
@@ -529,15 +604,5 @@
     usersRef.removeEdge(userUUID, throwIfError);
     return returnValue;
   });
-
-  //Listening for keys from Appbase
-  keysRef.on('edge_added', function(error, edgeRef, edgeSnap) {
-    throwIfError(error);
-    var keyObj = decodeKey(edgeSnap.name());
-    //ignore if key is already played, play otherwise
-    if(!keysAlreadyPlayed[keyObj.keyUUID]) {
-      playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
-    }
-  }, true); // Listen to new edges added in the ref
 
 })();
