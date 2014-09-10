@@ -473,7 +473,7 @@
     var handler = edgeRef.on('properties', function(error, ref, vSnap){
       edgeRef.off(handler);
       updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
-      if(!currentRoom) setRoom(edgeRef);  //set user's room to first edge
+      if(!currentRoom) setRoom(edgeRef);  //set user's room when first ran and when new room is created
     });
   });
 
@@ -496,7 +496,7 @@
     usersRef.on('edge_removed', events.usersRef.edge_removed, true);
     
     var roomSelector = '#'+currentRoom;
-    highlightRoom(roomSelector); //highlight the current room
+    $(function(){$(roomSelector).addClass('disabled')}); //highlight the current room
     $(window).bind('beforeunload', events.window);
 
     removeListeners = function(){
@@ -507,16 +507,9 @@
       keysRef.off();
       usersRef.off();
     }
-    return currentRoom;
   }
 
-  var highlightRoom = function(selector){
-    $(function(){
-      $(selector).addClass('disabled');
-    });
-  }
-
-  $(document).ready(function(){$('#addRoom').on('click', createRoom);});
+  $(document).ready(function(){$('#addRoom').on('click', createRoom)});
 
   var events = {
     keyRef : {
@@ -574,14 +567,11 @@
     } while(!roomName);
     var roomID = Appbase.uuid();
     var roomRef = Appbase.create('room', roomID);
-    console.time('create room');
     roomRef.setData({name: roomName}, function(){
       roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', function(){
         roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', function(){
-          mainRef.setEdge(roomRef, roomID, function(){ 
-            console.timeEnd('create room');
-            setRoom(roomRef);
-          });
+          currentRoom = false;
+          mainRef.setEdge(roomRef, roomID, throwIfError);
         });
       });
     });
