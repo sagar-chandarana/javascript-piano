@@ -4,39 +4,46 @@
         <meta charset=utf-8>
         <title>2HTML5 JavaScript Piano - with Data URIs</title>
         <meta name="description" content="A synth piano synth that generates all of its audio files dynamically using JavaScript and data URIs. Choose from a variety of sounds styles and play with the looper, visual waveforms, and more." />
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="css/piano.css" />
         <meta property="og:image" content="http://mrcoles.com/media/img/piano-visual-mode.png">
         <link rel="image_src" href="http://mrcoles.com/media/img/piano-visual-mode.png" />
     </head>
     <body>
-        <div id="content">
-            <div id="content-inner">
-                <div id="piano">
-                    <h1>Javascript Piano</h1>
-                    <div class="help show" tabindex="1">
-                        <div class="help-inner">
-                            <div id="synth-settings"></div>
-                            <div class="opts">
-                                <p><strong>Controls:</strong></p>
-                                <p>play using home row &amp; above &nbsp; /</p>
-                            </div>
-                            <div class="opts">
-                                <p><strong>Extras:</strong></p>
-                                <p class="toggle-color toggle hold">Color - c &nbsp; /</p>
-                                <p class="toggle-animate toggle">Visual mode - 8 &nbsp; /</p>
-                                <p>Help - 0</p>
+        <div class="container-fluid pull">
+            <div class="row">
+                <div class="col-md-12">
+                    <div id="piano">
+                        <h1>Piano</h1>
+                        <div class="help show" tabindex="1">
+                            <div class="help-inner">
+                                <div id="synth-settings"></div>
+                                <div class="opts">
+                                    <p><strong>Controls:</strong></p>
+                                    <p>play using home row &amp; above &nbsp; /</p>
+                                </div>
+                                <div class="opts">
+                                    <p><strong>Extras:</strong></p>
+                                    <p class="toggle-color toggle hold">Color - c &nbsp; /</p>
+                                    <p class="toggle-animate toggle">Visual mode - 8 &nbsp; /</p>
+                                    <p>Help - 0</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div style="color: ">
-                <h3 style="padding-left:10px;">Users Live at <span id="roomID"></span></h3>
-                <ul id="usernames" style="list-style:none;">
-                </ul>
-                <br><br><button id="addRoom">Add</button>
-                <ul id="roomList">
-                </ul>
+                <div class="col-md-offset-3 col-md-3 pull">
+                      <ul class="list-group">
+                          <li class="list-group-item active">Rooms<span id="addRoom" class="badge">+</span></li>
+                          <aside id="roomList"></aside>
+                      </ul>
+                </div>
+                <div class="col-md-3 pull">
+                    <ul class="list-group">
+                        <li class="list-group-item active">Users</li>
+                        <aside id="usernames"></aside>
+                    </div>
+                </div>
             </div>
         </div>
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
