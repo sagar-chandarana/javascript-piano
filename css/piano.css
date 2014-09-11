@@ -20,7 +20,6 @@
 
 html {
     background: #fff;
-    font: normal 14px/24px futura, Helvetica, Arial, sans serif;
     color: #999;
 }
 
@@ -29,18 +28,19 @@ a { text-decoration: none; }
 
 html, body { height: 100%; overflow-x:hidden; }
 
-.pull {
+.piano-body{
     padding-top: 40px;
+    padding-left:0!important;
+    padding-right: 0!important;
 }
 
 #piano {
+    padding: 40px 20px 8px;
+    width: 782px;
+
     position: relative;
     margin: 0 auto;
-    padding: 80px 40px 16px;
-    width: 782px;
     background: #f33;
-    border-radius: 20px;
-    box-shadow: 0 1px 0 #999, 0 2px 0 #999, 0 3px 0 #999, 1px 4px 0 #999, 2px 5px 0 #999, 3px 6px 0 #999, 4px 7px 0 #999, 5px 8px 0 #999, 0 0 8px #000;
     z-index: 2;
 }
 
@@ -53,22 +53,20 @@ html, body { height: 100%; overflow-x:hidden; }
     padding: 2px 0 0 2px;
     overflow: hidden;
     background: #000;
-    border-radius: 0 0 4px 4px;
 }
 
 .key {
-    float: left;
-    position: relative;
     width: 50px;
     height: 180px;
     margin: 0 2px 2px 0;
+
+    float: left;
+    position: relative;
     background: #fff;
-    border-radius: 0 0 4px 4px;
 }
 .key.pressed,
 .key:active {
     background: #f4f3f3;
-    box-shadow: inset 3px 2px 3px #999, inset -3px 2px 3px #999;
 }
 .key.black {
     width: 0;
@@ -76,16 +74,15 @@ html, body { height: 100%; overflow-x:hidden; }
     z-index: 2;
 }
 .key.black:after {
-    content: "";
-    position: absolute;
     top: -2px;
     left: -16px;
-    display: block;
     width: 32px;
     height: 117px;
+
+    content: "";
+    position: absolute;
+    display: block;
     background: #000;
-    border-radius: 0 0 4px 4px;
-    box-shadow: 1px 1px 0 #555, 2px 2px 0 #555;
 }
 .key.black1:after {
     left: -20px;
@@ -270,48 +267,70 @@ h1 {
     font-weight: bold;
 }
 
-/* **/
-
-.note {
-    position: fixed;
-    top: 20%;
-    left: 30%;
-    width: 40%;
-    background: #111;
-    background: rgba(0,0,0,.85);
-    border-radius: 10px;
-    padding: 60px 0;
-    color: #fff;
-    font-size: 16px;
-    line-height: 20px;
-    text-align: center;
-    z-index: 999;
+.wrapper{
+    height: 100%;
 }
 
-#usernames li{
+.sidebar{
+    background-color: #222;
+    height: 100%;
     user-select:none;
-    cursor:pointer;
 }
 
-#roomList li{
-    user-select:none;
-    cursor:pointer;
-    color:#428bca;
+.room .list-group-item.active {
+    font-weight: 700;
+    background-color: #272727;
+    border: 1px solid #222;
 }
 
-#usernames .list-group-item:first-child{
-    border-top-left-radius:2px;
-    border-top-right-radius: 2px;
+.room .list-group-item.active .badge{
+    color:black;
+    font-weight: 700;
 }
 
-#roomList .list-group-item:first-child{
-    border-top-left-radius:2px;
-    border-top-right-radius: 2px;
+.room li:not(.active){
+    color:white;
+    font-weight: 400;
+    background-color: #222;
+    border: 1px solid #333;
+    opacity: 0.7;
 }
 
-.badge{
-    color: #428bca;
+.room li.selected{
+    background-color: #272727;
+    border: 1px solid #222;
+    opacity: 1;
+}
+
+.room li:hover:not(.active){
+    background-color: #272727;
+    border: 1px solid #222;
+    opacity: 1;
+    cursor: pointer;
+}
+
+.users {
+    font-weight: 300;
+    margin-left: 20px;
+    padding-top:10px;
+}
+
+
+#addRoom{
+    color: black;
     background-color: white;
     cursor:pointer;
     user-select:none;
 }
+
+.grid{
+    padding-left:0;
+    padding-right: 0;
+}
+
+.grid img{
+    margin-top:40px;
+}
+
+
+
