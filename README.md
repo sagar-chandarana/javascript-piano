@@ -1,4 +1,6 @@
-HTML5 JavaScript Piano
-======================
+JAM with friends
+================
 
-This is an HTML5 synth piano that generates all of its audio files on the fly using data URIs. See the [HTML5 JavaScript Piano](http://mrcoles.com/piano/) live.
+JAM with friends is a live piano you can play with your friends built on [Appbase](http://appbase.io).
+
+Credits: See the [HTML5 JavaScript Piano](http://mrcoles.com/piano/) live.
