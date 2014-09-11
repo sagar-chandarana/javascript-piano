@@ -17,38 +17,48 @@
         <script src="js/piano.js"></script>
     </head>
     <body class="container-fluid">
-        <div class="row" ng-controller="PianoCtrl">
+        <div class="row wrapper" ng-controller="PianoCtrl">
             <div class="col-md-10 grid">
                 <!-- <div class="pull-right">
                     <a href="https://twitter.com/share" class="twitter-share-button" data-via="appbaseio" data-size="large">Tweet</a>
                     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
                 </div> -->
-                <div class="piano-body">
-                    <div id="piano"></div>
-                    <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
-                </div>
+                
                 <div class="container-fluid">
-                    <div class="users">
-                        <p>Online Users</p>
-                        <span ng-repeat="user in users">
-                            <span class="badge" color="user.color">&nbsp;</span>
-                            <span ng-bind="user.name"></span>
-                        </span>
+                    <div class="row">
+                        <img class="col-md-offset-4 col-md-4 grid" src="img/logo.png" />
+                        <div class="col-md-12 grid">
+                            <div class="piano-body">
+                                <div id="piano"></div>
+                                <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
+                            </div>
+                        </div>
+                        <div class="col-md-offset-1 col-md-10">
+                            <div class="users">
+                                <span ng-repeat="user in users">
+                                    <span class="badge" color="user.color">&nbsp;</span>
+                                    <span ng-bind="user.name"></span>
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 grid">
-              <ul class="list-group room">
-                  <li class="list-group-item active">
-                    Rooms
-                    <span id="addRoom" class="badge">+</span>
-                  </li>
-                  <li ng-repeat="room in rooms"
-                      class="list-group-item"
-                      ng-bind="room.name"
-                      ng-class="{'selected' : room.id === currentRoom}">
-                  </li>
-              </ul>
+            <div class="col-md-2 grid sidebar">
+              <div>
+                  <ul class="list-group room">
+                      <li class="list-group-item active">
+                        Rooms
+                        <span id="addRoom" ng-click="addRoom()" class="badge">+</span>
+                      </li>
+                      <li ng-repeat="room in rooms"
+                          class="list-group-item"
+                          ng-bind="room.name"
+                          ng-click="roomClick(room.id)"
+                          ng-class="{'selected' : room.id === currentRoom}">
+                      </li>
+                  </ul>
+                </div>
             </div>
         </div>
     </body>
