@@ -43,7 +43,7 @@ pianoApp.controller("PianoCtrl", function($scope){
       edgeRef.off(handler);
       updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
       if(!currentRoom) setRoom(edgeRef);  //set user's room when first ran and when new room is created
-      else updateHighlight('#' + currentRoom);
+      else updateHighlight();
     });
   });
 
@@ -75,14 +75,12 @@ pianoApp.controller("PianoCtrl", function($scope){
     keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
     usersRef.on('edge_removed', events.usersRef.edge_removed, true);
     
-    var roomSelector = '#'+currentRoom;
-    updateHighlight(roomSelector); //highlight the current room
+    updateHighlight(); //highlight the current room
     $(window).bind('beforeunload', events.window);
 
     removeListeners = function(){
-      $(roomSelector).removeClass('disabled');
+      $scope.users = [];
       usersRef.removeEdge(userUUID);
-      $('#usernames').html('');
       $(window).unbind('beforeunload');
       keysRef.off();
       usersRef.off();
@@ -140,8 +138,8 @@ pianoApp.controller("PianoCtrl", function($scope){
     setRoom(Appbase.ref(namespace + id));
   }
 
-  $scope.getCurrentRoom = function(){
-    return currentRoom;
+  $scope.createRoom = function(){
+    createRoom();
   }
 
   var updateList = function(name, id){
