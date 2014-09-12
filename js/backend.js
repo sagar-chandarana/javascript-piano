@@ -1,216 +1,249 @@
-var pianoApp = angular.module('pianoApp', []);
+(function(){
 
-pianoApp.directive("badge", function(){
-  return {
-    restrict: 'C',
-    scope: {
-      color: '='
-    },
-    link: function(scope, element){
-      if(scope.color) element.css('background-color', scope.color);
-    }
-  };
-});
+  /* To do:
+   * Front-end separation
+   * Remove unecessary functions from scope
+   * OK - Timeout feature
+   * IP - Keys should reference usersRef/edge and have a key property
+   * OK - Register the piano as a dependency so it's not in the window
+   * Don't let it send to appbase if keysref is not defined
+   * Show number of users in room
+   */
 
-pianoApp.controller("PianoCtrl", function($scope){
-  $scope.rooms = [];
-  $scope.users = [];
+  var pianoApp = angular.module('pianoApp', []);
 
-  Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
-  var namespace = 'pianoapp/piano/';
-  var mainRef = Appbase.ref(namespace);
-  
-  //User name and color
+  pianoApp.controller("PianoCtrl", function($scope, $piano){
+    Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
+    var namespace = 'pianoapp/piano/';
+    var mainRef = Appbase.ref(namespace);
 
-  //chooses a random color
-  function choice(x) {
-    return x[Math.floor(Math.random()*x.length)];
-  }
-  var myColor = '#' +
-      choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
-
-  var myName;
-  do {
-    myName = prompt("enter your handle (alphanumeric only)");
-  } while(!myName);
-  var userUUID = Appbase.uuid();
-  var userRef = Appbase.create('user', userUUID);
-  userRef.setData({name: myName, color: myColor}, throwIfError);
-
-  var currentRoom;
-  mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
-    var handler = edgeRef.on('properties', function(error, ref, vSnap){
-      edgeRef.off(handler);
-      updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
-      if(!currentRoom) setRoom(edgeRef);  //set user's room when first ran and when new room is created
-      else updateHighlight();
-    });
-  });
-
-  var removeListeners, keysRef, usersRef;
-  var setRoom = function(room){
-    var newRoom = room.path().replace(namespace, '');
-    if(newRoom === currentRoom) return; // No need to switch, inside the room.
-    else currentRoom = newRoom;
-
-    // Check if it's the first run to set room to hash, or if it's not the first remove listeners
-    removeListeners ? removeListeners() : (function(){
-      // first run, check for hash
-      if(window.location.hash) {
-        currentRoom = window.location.hash.substring(1);
-        room = Appbase.ref(namespace + currentRoom);
-      }
-    })();
-
-    window.location.hash = currentRoom;
-
-    keysRef = Appbase.ref(room.path() + '/keys');
-    usersRef = Appbase.ref(room.path() + '/users');
-
-    // set users edge to yourself. you were already removed from the room.
-    // when it's set, grab users list.
-    // This is done after listeners are called off.
-    usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
-    usersRef.setEdge(userRef, userUUID, throwIfError); //Register the user inside the room
-    keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
-    usersRef.on('edge_removed', events.usersRef.edge_removed, true);
+    $scope.rooms = [];
+    $scope.users = [];
     
-    updateHighlight(); //highlight the current room
-    $(window).bind('beforeunload', events.window);
+    //User name and color
 
-    removeListeners = function(){
-      $scope.users = [];
-      usersRef.removeEdge(userUUID);
-      $(window).unbind('beforeunload');
-      keysRef.off();
-      usersRef.off();
+    //chooses a random color
+    function choice(x) {
+      return x[Math.floor(Math.random()*x.length)];
     }
-  };
+    var myColor = '#' +
+        choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'
+        .split(' '));
 
-  var updateHighlight = function(){
-    $scope.currentRoom = currentRoom;
-    $scope.$apply();
-  }
-
-  $(document).ready(function(){$('#addRoom').on('click', createRoom)});
-
-  var events = {
-    keyRef : {
-      edge_added : function (error, edgeRef, edgeSnap) {
-        throwIfError(error);
-        var keyObj = decodeKey(edgeSnap.name());
-        //ignore if key is from this user
-        if(userUUID !== keyObj.userUUID) {
-          playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
-        }
-      }
-    }, 
-    usersRef : {
-      edge_added : function (error, edgeRef, edgeSnap) {
-        throwIfError(error);
-        edgeRef.on('properties', function(error, ref, vSnap) {
-          throwIfError(error);
-          edgeRef.off();
-          $scope.users.push({
-            name: vSnap.properties().name,
-            color: vSnap.properties().color,
-            id: edgeSnap.name()
-          });
-          $scope.$apply();
-        });
-      },
-      edge_removed : function (error, edgeRef, edgeSnap) {
-        throwIfError(error);
-        $scope.users.filter(function(each){
-          return each.id !== edgeSnap.name();
-        });
-      }
-    },
-    window : function(eventObject) {
-      var returnValue = 'Close?';
-      eventObject.returnValue = returnValue;
-      usersRef.removeEdge(userUUID, throwIfError);
-      return returnValue;
+    var getTime = function(){
+      var retVal = new Date();
+      return retVal.valueOf();
     }
-  }
 
-  $scope.roomClick = function(id){
-    setRoom(Appbase.ref(namespace + id));
-  }
-
-  $scope.createRoom = function(){
-    createRoom();
-  }
-
-  var updateList = function(name, id){
-    $scope.rooms.push({name: name, id: id});
-    $scope.$apply();
-  };
-
-  //old
-  // var keysRef = Appbase.ref('try/piano1/keys');
-
-  var throwIfError = function(error) {
-    if(error) throw Error;
-  }
-
-  var createRoom = function(){
-    var roomName;
+    var myName;
     do {
-      roomName = prompt("enter room name (alphanumeric only)");
-    } while(!roomName);
-    var roomID = Appbase.uuid();
-    var roomRef = Appbase.create('room', roomID);
-    roomRef.setData({name: roomName}, function(){
-      roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', function(){
-        roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', function(){
-          currentRoom = false;
-          mainRef.setEdge(roomRef, roomID, throwIfError);
-        });
+      myName = prompt("enter your handle (alphanumeric only)");
+    } while(!myName);
+    var userUUID = Appbase.uuid();
+    var userRef = Appbase.create('user', userUUID);
+    userRef.setData({name: myName, color: myColor, time: getTime()}, throwIfError);
+
+    var currentRoom;
+    mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
+      var handler = edgeRef.on('properties', function(error, ref, vSnap){
+        edgeRef.off(handler);
+        updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
+        if(!currentRoom) setRoom(edgeRef);  //set user's room when first ran and when new room is created
+        else updateHighlight();
       });
     });
-  }
 
-  var encodeKey = function(key, userUUID) {
-    return key.toString() + '_' + userUUID + (myColor!== undefined? '_' + myColor + '_' + myName : '');
-  }
+    var removeListeners, keysRef, usersRef;
+    var setRoom = function(room){
+      var newRoom = room.path().replace(namespace, '');
+      if(newRoom === currentRoom) return; // No need to switch, inside the room.
+      else currentRoom = newRoom;
 
-  var decodeKey = function(edgeName) {
-    edgeName = edgeName.split('_');
-    return {key: parseInt(edgeName[0]), userUUID: edgeName[1], color: edgeName[2], name: edgeName[3]};
-  }
+      // Check if it's the first run to set room to hash, or if it's not the first remove listeners
+      removeListeners ? removeListeners() : (function(){
+        // first run, check for hash
+        if(window.location.hash) {
+          currentRoom = window.location.hash.substring(1);
+          room = Appbase.ref(namespace + currentRoom);
+        }
+      })();
 
-  var pushToAppbase = function(key) {
-    keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
-  }
+      window.location.hash = currentRoom;
 
-  //Mouse and keyboard events call below function.
-  var triggerKey = function(key) {
-    playKeyInTheView(key, myColor, myName);
-    pushToAppbase(key);
-  }
+      keysRef = Appbase.ref(room.path() + '/keys');
+      usersRef = Appbase.ref(room.path() + '/users');
 
-  var colors = {};
-  var getColor = function(key) {
-    return colors[key] || "#fff";
-  }
+      // set users edge to yourself. you were already removed from the room.
+      // when it's set, grab users list.
+      // This is done after listeners are called off.
+      usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
+      usersRef.setEdge(userRef, userUUID, throwIfError); //Register the user inside the room
+      keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
+      usersRef.on('edge_removed', events.usersRef.edge_removed, true);
+      
+      updateHighlight(); //highlight the current room
+      var interval = setInterval(events.timePolling.update, events.timePolling.interval);
 
-  var piano = new Piano(triggerKey, getColor); // Piano instance
-  //var piano;
-  // This function plays a key.
-  var playKeyInTheView = function(key, color, name) {
-    colors[key] = color;
-    piano.trigger('note-'+key+'.play');
-  }
+      removeListeners = function(){
+        $scope.users = [];
+        clearInterval(interval);
+        events.usersRef.usersPropRefs.forEach(function(each){
+          each.off();
+        });
+        events.usersRef.usersPropRefs = [];
+        usersRef.removeEdge(userUUID);
+        keysRef.off();
+        usersRef.off();
+      }
+    };
 
-  var invertColor = function (hexTripletColor) {
-    var color = hexTripletColor;
-    color = color.substring(1);           // remove #
-    color = parseInt(color, 16);          // convert to integer
-    color = 0xFFFFFF ^ color;             // invert three bytes
-    color = color.toString(16);           // convert to hex
-    color = ("000000" + color).slice(-6); // pad with leading zeros
-    color = "#" + color;                  // prepend #
-    return color;
-  } 
-});
+    var updateHighlight = function(){
+      $scope.currentRoom = currentRoom;
+      $scope.$apply();
+    }
+
+    var events = {
+      keyRef : {
+        edge_added : function (error, edgeRef, edgeSnap) {
+          throwIfError(error);
+          var keyObj = decodeKey(edgeSnap.name());
+          //ignore if key is from this user
+          if(userUUID !== keyObj.userUUID) {
+            playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
+          }
+        }
+      }, 
+      usersRef : {
+        usersPropRefs : [],
+        edge_added : function (error, edgeRef, edgeSnap) {
+          throwIfError(error);
+          events.usersRef.usersPropRefs.push(edgeRef);
+          edgeRef.on('properties', function(error, ref, vSnap) {
+            throwIfError(error);
+            //edgeRef.off(); this is now done on setRoom
+            var updated = false;
+            var thisTime = getTime(), theirTime = vSnap.properties().time;
+            $scope.users.forEach(function(each){
+              if(each.id === edgeSnap.name()){ //there's already a user with this ID
+                each.time = theirTime;
+                updated = true;
+              }
+            });
+            if(!updated && theirTime > thisTime - events.timePolling.timeout){
+            //there are no users with that ID && their time is greater than the timeout threshold
+              $scope.users.push({
+                name: vSnap.properties().name,
+                color: vSnap.properties().color,
+                id: edgeSnap.name(),
+                time: theirTime
+              });
+            }
+            $scope.$apply();
+          });
+        },
+        edge_removed : function (error, edgeRef, edgeSnap) {
+          throwIfError(error);
+          $scope.users.filter(function(each){
+            return each.id !== edgeSnap.name();
+          });
+        }
+      },
+      window : function(eventObject) {
+        var returnValue = 'Close?';
+        eventObject.returnValue = returnValue;
+        usersRef.removeEdge(userUUID, throwIfError);
+        return returnValue;
+      },
+      timePolling : {
+        interval : 60000, // 1 minute
+        timeout : 600000, // 10 minutes
+        update : function(){
+          var now = getTime();
+          userRef.setData({time: now});
+          $scope.users = $scope.users.filter(function(each){
+            return each.time > now - events.timePolling.timeout;
+          }); //if their time is greater than the timeout barrier, keep. else, remove
+        }
+      }
+    };
+    $(window).bind('beforeunload', events.window); // remove user if tab closes
+
+    $scope.roomClick = function(id){
+      setRoom(Appbase.ref(namespace + id));
+    }
+
+    $scope.createRoom = function(){
+      createRoom();
+    }
+
+    var updateList = function(name, id){
+      $scope.rooms.push({name: name, id: id});
+      $scope.$apply();
+    };
+
+    var throwIfError = function(error) {
+      if(error) throw Error;
+    }
+
+    var createRoom = function(){
+      var roomName;
+      do {
+        roomName = prompt("enter room name (alphanumeric only)");
+      } while(!roomName);
+      var roomID = Appbase.uuid();
+      var roomRef = Appbase.create('room', roomID);
+      roomRef.setData({name: roomName}, function(){
+        roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', function(){
+          roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', function(){
+            currentRoom = false;
+            mainRef.setEdge(roomRef, roomID, throwIfError);
+          });
+        });
+      });
+    }
+
+    var encodeKey = function(key, userUUID) {
+      return key.toString() + '_' + userUUID + (myColor!== undefined? '_' + myColor + '_' + myName : '');
+    }
+
+    var decodeKey = function(edgeName) {
+      edgeName = edgeName.split('_');
+      return {key: parseInt(edgeName[0]), userUUID: edgeName[1], color: edgeName[2], name: edgeName[3]};
+    }
+
+    var pushToAppbase = function(key) {
+      keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
+    }
+
+    //Mouse and keyboard events call below function.
+    var triggerKey = function(key) {
+      playKeyInTheView(key, myColor, myName);
+      pushToAppbase(key);
+    }
+
+    var colors = {};
+    var getColor = function(key) {
+      return colors[key] || "#fff";
+    }
+
+    var piano = $piano(triggerKey, getColor); // Piano instance
+
+    // This function plays a key.
+    var playKeyInTheView = function(key, color, name) {
+      colors[key] = color;
+      piano.trigger('note-'+key+'.play');
+    }
+
+    var invertColor = function (hexTripletColor) {
+      var color = hexTripletColor;
+      color = color.substring(1);           // remove #
+      color = parseInt(color, 16);          // convert to integer
+      color = 0xFFFFFF ^ color;             // invert three bytes
+      color = color.toString(16);           // convert to hex
+      color = ("000000" + color).slice(-6); // pad with leading zeros
+      color = "#" + color;                  // prepend #
+      return color;
+    } 
+  });
+
+})();
