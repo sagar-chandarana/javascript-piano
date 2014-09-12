@@ -66,7 +66,7 @@ html, body { height: 100%; overflow-x:hidden; }
 }
 .key.pressed,
 .key:active {
-    background: #f4f3f3;
+    background: #e4e3e3;
 }
 .key.black {
     width: 0;
@@ -297,7 +297,7 @@ h1 {
 }
 
 .room li.selected{
-    background-color: #272727;
+    background-color: #333;
     border: 1px solid #222;
     opacity: 1;
 }
@@ -309,14 +309,23 @@ h1 {
     cursor: pointer;
 }
 
+.room li.selected:hover{
+    background-color: #333;
+    border: 1px solid #222;
+    opacity: 1;
+}
+
 .users {
     height: 25px;
     line-height: 25px;
     font-weight: 300;
-    margin-left: 20px;
-    padding-top:35px;
+    margin-left: 15px;
+    padding-top:40px;
 }
 
+.users span .badge{
+    margin-left: 5px;
+}
 
 #addRoom{
     color: black;
