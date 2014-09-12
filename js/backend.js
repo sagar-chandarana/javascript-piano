@@ -3,9 +3,11 @@
   /* To do:
    * Front-end separation
    * Remove unecessary functions from scope
-   * Timeout feature
+   * OK - Timeout feature
    * IP - Keys should reference usersRef/edge and have a key property
    * OK - Register the piano as a dependency so it's not in the window
+   * Don't let it send to appbase if keysref is not defined
+   * Show number of users in room
    */
 
   var pianoApp = angular.module('pianoApp', []);
@@ -25,7 +27,13 @@
       return x[Math.floor(Math.random()*x.length)];
     }
     var myColor = '#' +
-        choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'.split(' '));
+        choice('f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'
+        .split(' '));
+
+    var getTime = function(){
+      var retVal = new Date();
+      return retVal.valueOf();
+    }
 
     var myName;
     do {
@@ -33,7 +41,7 @@
     } while(!myName);
     var userUUID = Appbase.uuid();
     var userRef = Appbase.create('user', userUUID);
-    userRef.setData({name: myName, color: myColor}, throwIfError);
+    userRef.setData({name: myName, color: myColor, time: getTime()}, throwIfError);
 
     var currentRoom;
     mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
@@ -75,13 +83,15 @@
       
       updateHighlight(); //highlight the current room
       var interval = setInterval(events.timePolling.update, events.timePolling.interval);
-      $(window).bind('beforeunload', events.window);
 
       removeListeners = function(){
         $scope.users = [];
         clearInterval(interval);
+        events.usersRef.usersPropRefs.forEach(function(each){
+          each.off();
+        });
+        events.usersRef.usersPropRefs = [];
         usersRef.removeEdge(userUUID);
-        $(window).unbind('beforeunload');
         keysRef.off();
         usersRef.off();
       }
@@ -104,16 +114,30 @@
         }
       }, 
       usersRef : {
+        usersPropRefs : [],
         edge_added : function (error, edgeRef, edgeSnap) {
           throwIfError(error);
+          events.usersRef.usersPropRefs.push(edgeRef);
           edgeRef.on('properties', function(error, ref, vSnap) {
             throwIfError(error);
-            //edgeRef.off(); 
-            $scope.users.push({
-              name: vSnap.properties().name,
-              color: vSnap.properties().color,
-              id: edgeSnap.name()
+            //edgeRef.off(); this is now done on setRoom
+            var updated = false;
+            var thisTime = getTime(), theirTime = vSnap.properties().time;
+            $scope.users.forEach(function(each){
+              if(each.id === edgeSnap.name()){ //there's already a user with this ID
+                each.time = theirTime;
+                updated = true;
+              }
             });
+            if(!updated && theirTime > thisTime - events.timePolling.timeout){
+            //there are no users with that ID && their time is greater than the timeout threshold
+              $scope.users.push({
+                name: vSnap.properties().name,
+                color: vSnap.properties().color,
+                id: edgeSnap.name(),
+                time: theirTime
+              });
+            }
             $scope.$apply();
           });
         },
@@ -131,12 +155,18 @@
         return returnValue;
       },
       timePolling : {
-        interval : 60000,
+        interval : 60000, // 1 minute
+        timeout : 600000, // 10 minutes
         update : function(){
-
-        }    
+          var now = getTime();
+          userRef.setData({time: now});
+          $scope.users = $scope.users.filter(function(each){
+            return each.time > now - events.timePolling.timeout;
+          }); //if their time is greater than the timeout barrier, keep. else, remove
+        }
       }
     };
+    $(window).bind('beforeunload', events.window); // remove user if tab closes
 
     $scope.roomClick = function(id){
       setRoom(Appbase.ref(namespace + id));
