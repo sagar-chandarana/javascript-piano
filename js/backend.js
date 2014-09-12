@@ -99,7 +99,7 @@
 
     var updateHighlight = function(){
       $scope.currentRoom = currentRoom;
-      $scope.$apply();
+      $scope.$safeApply();
     }
 
     var events = {
@@ -138,7 +138,7 @@
                 time: theirTime
               });
             }
-            $scope.$apply();
+            $scope.$safeApply();
           });
         },
         edge_removed : function (error, edgeRef, edgeSnap) {
@@ -178,7 +178,7 @@
 
     var updateList = function(name, id){
       $scope.rooms.push({name: name, id: id});
-      $scope.$apply();
+      $scope.$safeApply();
     };
 
     var throwIfError = function(error) {
@@ -243,7 +243,7 @@
       color = ("000000" + color).slice(-6); // pad with leading zeros
       color = "#" + color;                  // prepend #
       return color;
-    } 
+    }
   });
 
 })();

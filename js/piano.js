@@ -266,6 +266,7 @@
         // Silly colors
         //
         (function() {
+          console.log($('#piano').offset().top, $('#piano').outerHeight())
           var shouldAnimate = true,
             $piano = $('#piano'),
             W = $piano.width(),
