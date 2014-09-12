@@ -13,6 +13,7 @@
         <script src="appbase.js"></script>
 
         <script src="js/backend.js"></script>
+        <script src="js/frontend.js"></script>
         <script src="js/audio.js"></script>
         <script src="js/piano.js"></script>
     </head>
@@ -27,18 +28,18 @@
                 <div class="container-fluid">
                     <div class="row">
                         <img class="col-md-offset-4 col-md-4 grid" src="img/logo.png" />
-                        <div class="col-md-12 grid">
-                            <div class="piano-body">
-                                <div id="piano"></div>
-                                <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
-                            </div>
-                        </div>
                         <div class="col-md-offset-1 col-md-10">
                             <div class="users">
                                 <span ng-repeat="user in users">
                                     <span class="badge" color="user.color">&nbsp;</span>
                                     <span ng-bind="user.name"></span>
                                 </span>
+                            </div>
+                        </div>
+                        <div class="col-md-12 grid">
+                            <div class="piano-body">
+                                <div id="piano"></div>
+                                <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
                             </div>
                         </div>
                     </div>
