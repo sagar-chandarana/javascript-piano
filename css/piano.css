@@ -29,7 +29,7 @@ a { text-decoration: none; }
 html, body { height: 100%; overflow-x:hidden; }
 
 .piano-body{
-    padding-top: 40px;
+    padding-top: 5px;
     padding-left:0!important;
     padding-right: 0!important;
 }
@@ -310,9 +310,11 @@ h1 {
 }
 
 .users {
+    height: 25px;
+    line-height: 25px;
     font-weight: 300;
     margin-left: 20px;
-    padding-top:10px;
+    padding-top:35px;
 }
 
 

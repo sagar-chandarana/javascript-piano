@@ -4,8 +4,8 @@
    * Front-end separation
    * Remove unecessary functions from scope
    * Timeout feature
-   * Keys should reference usersRef/edge and have a key property
-   * Register the piano as a dependency so it's not in the window
+   * IP - Keys should reference usersRef/edge and have a key property
+   * OK - Register the piano as a dependency so it's not in the window
    */
 
   var pianoApp = angular.module('pianoApp', []);
