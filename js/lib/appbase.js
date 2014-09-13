@@ -6439,7 +6439,7 @@
       },
 
       get: function(type, url, isClone) {
-        var isClone = typeof isClone !== 'undefined' ? isClone : true
+        var isClone = isClone === undefined ? true : isClone
         if (isClone && ab.cache.memStore.hasOwnProperty(url)) {
           return JSON.parse(JSON.stringify(ab.cache.memStore[url][type]))
         } else if (!isClone && ab.cache.memStore.hasOwnProperty(url)) {
@@ -6484,9 +6484,9 @@
           })
           .error(callback)
       },
-      set: function(url, data, callback) {
+      set: function(url, data, callback, timestamp) {
         // catch data validation errors at the user interface level function
-        atomic.patch(url + "/~properties", {"data":data, "secret": ab.server.getAppSecret()})
+        atomic.patch(url + "/~properties", {"data":data, "secret": ab.server.getAppSecret(), timestamp: timestamp})
          .success(function(result) {
            if(typeof result === 'string') {
              callback(new Error(result))
@@ -6674,10 +6674,12 @@
       var internalFunctions = {
         onProperties: function(interfaceCallback) {
           if(ab.server.vertex.urlsListening[exports.URL()]) {
-            setTimeout(function(){
-              ab.firing.prepareForProperties('RETR', exports.URL(), {},
-                ab.cache.get('vertex', exports.URL()), interfaceCallback)
-            },0)
+            if(ab.cache.timestamps[exports.URL()] && ab.cache.timestamps[exports.URL()]['vertex']) { //fire only the timestamp exists- the data is arrived from server
+              setTimeout(function() {
+                ab.firing.prepareForProperties('RETR', exports.URL(), {},
+                  ab.cache.get('vertex', exports.URL()), interfaceCallback)
+              },0)
+            }
           }
           amplify.subscribe("properties:"+exports.URL(), referenceID, interfaceCallback)
           if(!ab.server.vertex.urlsListening[exports.URL()]) {
@@ -6695,7 +6697,7 @@
         onEdges: function(event, interfaceCallback, onlyNew) {
           if(ab.server.edges.urlsListening[exports.URL()]) {
             if(event == "edge_added")
-              setTimeout(function(){
+              setTimeout(function() {
                 ab.firing.prepareForEdges('RETR', exports.URL(), {},
                   ab.cache.get('edges', exports.URL()), interfaceCallback)
               },0)
@@ -6809,7 +6811,7 @@
           if(ab.cache.newVertices[path]) {
             setTimeout(checkForCreationAndGoAhead,200)
           } else {
-            ab.server.vertex.set(exports.URL(), data, function(error,result) {
+            ab.server.vertex.set(exports.URL(), data, function(error, result) {
               if(!error)
                 callback && callback(error, exports)
               else {
@@ -6822,6 +6824,58 @@
           }
         }
         checkForCreationAndGoAhead()
+      }
+
+      exports.commitData = function(apply, cb, i) {
+        var dupRef = ab.interface.ref(path)
+        var commit = function(attempt) {
+          if(attempt >= 10) {
+            //as it goes into an endless loop, we are putting a hard limit on the number of attemtps
+            cb(null, exports)
+            return
+          }
+
+          dupRef.on('properties', function(error, ref, vSnap) {
+            dupRef.off()
+            if(error) {
+              cb && cb(error, exports)
+            } else {
+              try {
+                var newData = apply(vSnap.properties())
+              } catch (e) {
+                if(cb)
+                  cb(error, exports)
+                else
+                  throw error
+              }
+              if(typeof newData !== 'object') {
+                if(cb)
+                  cb("The function must return an oject.", exports)
+                else
+                  throw "The function must return an oject."
+              } else {
+                ab.server.vertex.set(exports.URL(), newData, function(error, result) {
+                  if(!error){
+                    cb && cb(error, exports)
+                    console.log('succeeded,','function:', i, 'attempt:', attempt, 'data:', newData)
+                  }
+                  else {
+                    if(error.toString() === '000: Internal Error') { //means the server timestamp didn't match with the one sent
+                      console.log('failed,','functio  n:', i, 'attempt:', attempt, 'data:', newData)
+                      commit(attempt+1)
+                    } else {
+                      if(cb)
+                        cb(error, exports)
+                      else
+                        throw error
+                    }
+                  }
+                }, ab.cache.timestamps[exports.URL()]['vertex'])
+              }
+            }
+          })
+        }
+        commit(1)
       }
 
       exports.removeData = function(data, callback) {
@@ -6997,6 +7051,8 @@
 
     ab.util = {
       createVertexSnapshot: function(previous, current) {
+        current = JSON.parse(JSON.stringify(current))
+        previous = JSON.parse(JSON.stringify(previous))
         return {
           properties: function() {
             return current
