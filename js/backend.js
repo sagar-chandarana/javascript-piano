@@ -15,7 +15,7 @@
       Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
       var namespace = 'pianoapp/piano/';
       var mainRef = Appbase.ref(namespace);
-      var currentRoom, removeListeners, keysRef, usersRef, userRef, userUUID;
+      var currentRoom, removeListeners, keysRef, usersRef, userRef, userUUID, createdRoom;
 
       $rootScope.Appbase = {
         currentRoom: currentRoom,
@@ -165,7 +165,13 @@
       };
 
       function updateList(name, id){
-        $rootScope.rooms.push({name: name, id: id});
+        if(createdRoom && createdRoom === id){
+          $rootScope.rooms.unshift({name: name, id: id});
+          createdRoom = false;
+        } else {
+          $rootScope.rooms.push({name: name, id: id});
+        }
+        
         $rootScope.safeApply();
       };
 
@@ -196,6 +202,7 @@
         }
         function callback(error){
           throwIfError(error);
+          createdRoom = roomID;
           currentRoom = false;
           mainRef.setEdge(roomRef, roomID, throwIfError);
         }

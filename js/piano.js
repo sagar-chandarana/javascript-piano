@@ -254,21 +254,27 @@
         var shouldAnimate = true,
           $piano = $('#piano'),
           W = $piano.width(),
-          H = 200,
-          $canvas = $('<canvas>', {
-            css: {
-              position: 'fixed',
-              top: ($piano.offset().top + $piano.outerHeight() - 1) + 'px',
-              // left: '50%',
-              // marginLeft: Math.floor(-W/2) + 'px', // need to figure this out...
-              width: W,
-              height: H
-            }
-          })
-            .attr('width', W)
-            .attr('height', H)
-            .prependTo('#piano'),
-          canvas = $canvas.get(0),
+          H = 200;
+          var $canvas = $('canvas');
+          $canvas.css({
+            position: 'fixed',
+            height: H
+          });
+          $canvas.attr('height', H);
+          // $canvas = $('<canvas>', {
+          //   css: {
+          //     position: 'fixed',
+          //     top: ($piano.offset().top + $piano.outerHeight() - 1) + 'px',
+          //     // left: '50%',
+          //     // marginLeft: Math.floor(-W/2) + 'px', // need to figure this out...
+          //     width: W,
+          //     height: H
+          //   }
+          // })
+          //   .attr('width', W)
+          //   .attr('height', H)
+          //   .prependTo('#piano'),
+          var canvas = $canvas.get(0),
           ctx = canvas.getContext('2d');
 
         function getData(note) {

@@ -2,23 +2,14 @@
 
 	angular
     .module('pianoApp')
-    .directive('badge', badge)
     .controller('UtilCtrl', utilCtrl)
     .controller('LoginCtrl', loginCtrl)
     .controller('UsersCtrl', usersCtrl)
-    .controller('RoomsCtrl', roomsCtrl);
+    .controller('RoomsCtrl', roomsCtrl)
+    .directive('badge', badge)
+    .directive('canvas', canvas);
 
-	function badge(){
-	  return {
-	    restrict: 'C',
-	    scope: {
-	      color: '='
-	    },
-	    link: function(scope, element){
-	      if(scope.color) element.css('background-color', scope.color);
-	    }
-	  };
-	};
+  
 
 	function utilCtrl($rootScope){
     var vm = this;
@@ -96,6 +87,38 @@
       vm.adding = !vm.adding;
     }
 
+  }
+  
+  function canvas($rootScope){
+    return {
+      restrict: 'E',
+      link: function(scope, element){
+        var piano = $('#piano');
+        var watcher = $rootScope.$watch('users', update);
+        function update(a){
+          if(a){
+            watcher(); // clear $watch
+            element.css({
+              width: piano.width(),
+              top: (piano.offset().top + piano.outerHeight() - 1) + 'px'
+            });
+            element.attr('width', piano.width());
+          }
+        }
+      }
+    };
+  }
+
+  function badge(){
+    return {
+      restrict: 'C',
+      scope: {
+        color: '='
+      },
+      link: function(scope, element){
+        if(scope.color) element.css('background-color', scope.color);
+      }
+    };
   }
 
 
