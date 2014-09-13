@@ -1,12 +1,7 @@
 (function(){
 
   /* To do:
-   * OK - Front-end separation
-   * Remove unecessary functions from scope
-   * OK - Timeout feature
    * IP - Keys should reference usersRef/edge and have a key property
-   * OK - Register the piano as a dependency so it's not in the window
-   * Don't let it send to appbase if keysref is not defined
    * Show number of users in room
    */
 
@@ -15,7 +10,7 @@
     .factory('AppbaseFactory', appbase);
 
 
-  function appbase($rootScope, $interval, $location, $log){
+  function appbase($rootScope, $interval, $location){
     return function(username, myColor){
       Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
       var namespace = 'pianoapp/piano/';
@@ -24,12 +19,13 @@
 
       $rootScope.Appbase = {
         currentRoom: currentRoom,
-        pushToAppbase: function(key){
-          keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
-          console.log('pushed')
-        },
+        pushToAppbase: pushToAppbase,
         createRoom: function(name){
           createRoom(name);
+        },
+        switchRoom: function(room){
+          room = Appbase.ref(namespace + room);
+          setRoom(room);
         }
       };
 
@@ -37,11 +33,10 @@
         keyRef : {
           edge_added : function (error, edgeRef, edgeSnap) {
             throwIfError(error);
-            var keyObj = decodeKey(edgeSnap.name());
-            console.log(edgeRef.path());
-            //ignore if key is from this user
-            if(userUUID !== keyObj.userUUID) {
-              $rootScope.Piano.playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
+
+            var obj = decodeKey(edgeSnap.name());
+            if(userUUID !== obj.user){
+              $rootScope.Piano.playKeyInTheView(obj.key, obj.color);
             }
           }
         }, 
@@ -78,6 +73,7 @@
             $rootScope.users = $rootScope.users.filter(function(each){
               return each.id !== edgeSnap.name();
             });
+            $rootScope.safeApply();
           }
         },
         window : function(eventObject) {
@@ -91,7 +87,6 @@
           timeout : 600000, // 10 minutes
           update : function(){
             var now = getTime();
-            $log.log('Updating time to ', now);
             userRef.setData({time: now});
             $rootScope.users = $rootScope.users.filter(function(each){
               return each.time > now - events.timePolling.timeout;
@@ -176,7 +171,7 @@
 
       function throwIfError(error) {
         if(error){
-          throw Error;
+          throw error;
         }
       }
 
@@ -207,10 +202,10 @@
 
       }
 
-      function encodeKey(key, userUUID) {
+      function encodeKey(key) {
         return key.toString()
           + '_' + userUUID
-          + (myColor!== undefined? '_' + myColor + '_' + username : '')
+          + '_' + myColor
           + '_' + Appbase.uuid();
       }
 
@@ -218,16 +213,19 @@
         edgeName = edgeName.split('_');
         return {
           key: parseInt(edgeName[0]),
-          userUUID: edgeName[1],
+          user: edgeName[1],
           color: edgeName[2],
-          name: edgeName[3],
-          keyuuid: edgeName[4]
+          keyuuid: edgeName[3]
         };
       }
 
       function getTime(){
         var retVal = new Date();
         return retVal.valueOf();
+      }
+
+      function pushToAppbase(key){
+        keysRef.setEdge(keysRef, encodeKey(key), throwIfError);
       }
 
     };

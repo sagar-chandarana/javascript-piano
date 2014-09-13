@@ -25,7 +25,6 @@
       function triggerKey(key) { //mnvr
         playKeyInTheView(key, myColor);
         $rootScope.Appbase.pushToAppbase(key);
-        console.log(key)
       }
 
       function playKeyInTheView(key, color) {

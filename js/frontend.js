@@ -38,6 +38,7 @@
     var vm = this;
     var color = randomColor();
     vm.setUser = setUser;
+    vm.logging = false;
     vm.logged = false;
 
 		function randomColor() {
@@ -48,6 +49,7 @@
 
 		function setUser(username){
 			if(username){
+        vm.logging = true;
         PianoFactory(color);
 				AppbaseFactory(username, color);
         vm.logged = true;
@@ -69,17 +71,29 @@
   function roomsCtrl($rootScope){
     var vm = this;
     vm.createRoom = createRoom;
+    vm.switchRoom = switchRoom;
     vm.rooms = $rootScope.rooms;
+    vm.add = add;
+    vm.adding = false;
     $rootScope.$watch('rooms', updateRooms);
 
     function createRoom(){
-      if(vm.name){
-        appbase.addRoom(name);
+      var name = window.prompt('Set a name for the new room.');
+      if(name){
+        $rootScope.Appbase.createRoom(name);
       }
+    }
+
+    function switchRoom(room){
+      $rootScope.Appbase.switchRoom(room);
     }
 
     function updateRooms(rooms){
       vm.rooms = rooms;
+    }
+
+    function add(){
+      vm.adding = !vm.adding;
     }
 
   }

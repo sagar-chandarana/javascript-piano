@@ -26,7 +26,7 @@ html {
 strong { font-weight: normal; }
 a { text-decoration: none; }
 
-html, body { height: 100%; overflow-x:hidden; }
+html, body { height: 100%; overflow-x:hidden; background-color: #f5f5f5}
 
 .piano-body{
     padding-top: 5px;
@@ -316,15 +316,19 @@ h1 {
 }
 
 .users {
+    padding-top: 5px;
     height: 25px;
     line-height: 25px;
     font-weight: 300;
     margin-left: 15px;
-    padding-top:40px;
+}
+.social{
+    text-align: center;
+    padding-top:5px;
 }
 
 .users span .badge{
-    margin-left: 5px;
+    margin-left: 20px;
 }
 
 .addRoom{
@@ -343,5 +347,18 @@ h1 {
     margin-top:40px;
 }
 
+.room-name{
+    -webkit-user-select:all!important;
+    width: 70%;
+}
 
+.logo{
+    margin-top: 40px;
+    background: url(../img/logo.png) center no-repeat;
+    background-size:contain;
+    height: 15em;
+}
 
+.login{
+    margin-top:7%;
+}
