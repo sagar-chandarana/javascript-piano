@@ -1,0 +1,14 @@
+<div class="col-md-offset-1 col-md-10">
+    <div class="users" ng-controller="UsersCtrl">
+        <span ng-repeat="user in users">
+            <span class="badge" color="user.color">&nbsp;</span>
+            <span ng-bind="user.name"></span>
+        </span>
+    </div>
+</div>
+<div class="col-md-12 grid">
+    <div class="piano-body">
+        <div id="piano"></div>
+        <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
+    </div>
+</div>

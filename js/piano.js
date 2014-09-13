@@ -433,4 +433,33 @@
       } //return
     }); //provider
   }); //configure
+
+  pianoApp.factory('Piano', function($rootScope, $piano){
+    return function(color){
+      //Mouse and keyboard events call below function.
+      var myColor = color;
+      var triggerKey = function(key) {
+        playKeyInTheView(key, myColor);
+        $rootScope.Appbase.pushToAppbase(key);
+      }
+
+      var colors = {};
+      var getColor = function(key) {
+        return colors[key] || "#fff";
+      }
+
+      var piano = $piano(triggerKey, getColor); // Piano instance
+
+      // This function plays a key.
+      var playKeyInTheView = function(key, color) {
+        colors[key] = color;
+        piano.trigger('note-'+key+'.play');
+      }
+
+      $rootScope.Piano = {
+        playKeyInTheView: playKeyInTheView
+      };
+    }
+  });
+
 })(); //initial scope
