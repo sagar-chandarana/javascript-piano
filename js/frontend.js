@@ -1,8 +1,14 @@
 (function(){
 
-	var pianoApp = angular.module('pianoApp');
+	angular
+    .module('pianoApp')
+    .directive('badge', badge)
+    .controller('UtilCtrl', utilCtrl)
+    .controller('LoginCtrl', loginCtrl)
+    .controller('UsersCtrl', usersCtrl)
+    .controller('RoomsCtrl', roomsCtrl);
 
-	pianoApp.directive("badge", function(){
+	function badge(){
 	  return {
 	    restrict: 'C',
 	    scope: {
@@ -14,34 +20,68 @@
 	  };
 	});
 
-	pianoApp.controller('RoomsCtrl', function($scope, $rootScope){
-    $rootScope.rooms = [];
-    $rootScope.$watch('Appbase.getCurrentRoom()', function(value){
-      $scope.currentRoom = value;
-    });
-    $scope.addRoom = function(name){
-      name = name || 'test';
-      $rootScope.Appbase.addRoom(name);
+	function utilCtrl($rootScope){
+    var vm = this;
+    vm.currentRoom = $rootScope.Appbase.currentRoom;
+    $rootScope.$watch('Appbase.currentRoom', updateRoom);
+
+    function updateRoom(room){
+      vm.currentRoom = room;
+      $rootScope.safeApply();
+      /* This updates the highlighted room in the list,
+         necessary because the async call happens outside of Angular */
     }
+
   });
 
-	pianoApp.controller('UsersCtrl', function($scope, $rootScope){
-    $rootScope.users = [];
-	});
+	function loginCtrl(PianoFactory, AppbaseFactory){
+    var vm = this;
+    vm.login = login;
+    vm.logged = false;
 
-	pianoApp.controller('LoginCtrl', function($scope, Appbase, Piano){
-		var randomColor = function() {
+		function randomColor() {
 			var colors = 'f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'
 		               .split(' ');
 		 	return '#' + colors[Math.floor(Math.random()*colors.length)];
 		}
 
-		$scope.login = function(username){
+		function setUser(username){
 			if(username){
         Piano(randomColor);
-				Appbase(username, randomColor);
+				AppbaseFactory(username, randomColor);
+        vm.logged = true;
 			}
-		};
-	})
+		}
 
-})()
+	}
+
+  function usersCtrl(){
+    var vm = this;
+    vm.users = $rootScope.users;
+    $rootScope.$watch('users', updateUsers);
+
+    function updateUsers(users){
+      vm.users = users;
+    }
+  }
+
+  function roomsCtrl($rootScope){
+    var vm = this;
+    vm.createRoom = createRoom;
+    vm.rooms = $rootScope.rooms;
+    $rootScope.$watch('rooms', updateRooms);
+
+    function createRoom(){
+      if(vm.name){
+        appbase.addRoom(name);
+      }
+    }
+
+    function updateRooms(rooms){
+      vm.rooms = rooms;
+    }
+
+  }
+
+
+})();

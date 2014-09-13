@@ -1,7 +1,7 @@
 (function(){
 
   /* To do:
-   * Front-end separation
+   * OK - Front-end separation
    * Remove unecessary functions from scope
    * OK - Timeout feature
    * IP - Keys should reference usersRef/edge and have a key property
@@ -10,21 +10,30 @@
    * Show number of users in room
    */
 
-  var pianoApp = angular.module('pianoApp');
+  angular
+    .module('pianoApp')
+    .factory('AppbaseFactory', appbase);
 
-  pianoApp.factory('Appbase', function($rootScope){
-    return function(username, randomColor){
+
+  function appbase($rootScope, $interval, $location){
+    return function(username, myColor){
       Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
       var namespace = 'pianoapp/piano/';
       var mainRef = Appbase.ref(namespace);
-      var currentRoom, removeListeners, keysRef, usersRef, userRef, userUUID, myColor=randomColor;
+      var currentRoom, removeListeners, keysRef, usersRef, userRef, userUUID;
 
-      var getTime = function(){
-        var retVal = new Date();
-        return retVal.valueOf();
-      }
+      $rootScope.Appbase = {
+        currentRoom: currentRoom,
+        pushToAppbase: function(key){
+          keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
+        },
+        createRoom: function(name){
+          createRoom(name);
+        }
+      };
+      createUser(username, myColor);
 
-      var createUser = function(name, color){
+      function createUser(name, color){
         userUUID = Appbase.uuid();
         userRef = Appbase.create('user', userUUID);
         userRef.setData({name: name, color: color, time: getTime()}, throwIfError);
@@ -33,30 +42,36 @@
           var handler = edgeRef.on('properties', function(error, ref, vSnap){
             edgeRef.off(handler);
             updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
-            if(!currentRoom) setRoom(edgeRef);
+            if(!currentRoom) {
+              setRoom(edgeRef);
+            }
             //set user's room when first ran and when new room is created
-            else updateHighlight();
           });
         });
 
         $(window).bind('beforeunload', events.window); // remove user if tab closes
-      };
+      }
 
-      var setRoom = function(room){
+      function setRoom(room){
         var newRoom = room.path().replace(namespace, '');
-        if(newRoom === currentRoom) return; // No need to switch, inside the room.
-        else currentRoom = newRoom;
-
+        if(newRoom === currentRoom) {
+          return; // No need to switch, inside the room.
+        } else {
+          currentRoom = newRoom;
+        }
+        
         // Check if it's the first run to set room to hash, or if it's not the first remove listeners
-        removeListeners ? removeListeners() : (function(){
+        if(!removeListeners){
           // first run, check for hash
-          if(window.location.hash) {
-            currentRoom = window.location.hash.substring(1);
+          if($location.hash()) {
+            currentRoom = $location.hash().substring(1);
             room = Appbase.ref(namespace + currentRoom);
           }
-        })();
+        } else {
+          removeListeners();
+        }
 
-        window.location.hash = currentRoom;
+        $location.hash(currentRoom);
 
         keysRef = Appbase.ref(room.path() + '/keys');
         usersRef = Appbase.ref(room.path() + '/users');
@@ -69,12 +84,12 @@
         keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
         usersRef.on('edge_removed', events.usersRef.edge_removed, true);
         
-        updateHighlight(); //highlight the current room
-        var interval = setInterval(events.timePolling.update, events.timePolling.interval);
+        var interval = $interval(events.timePolling.update, events.timePolling.interval);
+        $rootScope.Appbase.currentRoom = currentRoom;
 
         removeListeners = function(){
           $rootScope.users = [];
-          clearInterval(interval);
+          $interval.cancel(interval);
           events.usersRef.usersPropRefs.forEach(function(each){
             each.off();
           });
@@ -82,13 +97,8 @@
           usersRef.removeEdge(userUUID);
           keysRef.off();
           usersRef.off();
-        }
+        };
       };
-
-      var updateHighlight = function(){
-        // $scope.currentRoom = currentRoom;
-        // $rootScope.$safeApply();
-      }
 
       var events = {
         keyRef : {
@@ -108,7 +118,7 @@
             events.usersRef.usersPropRefs.push(edgeRef);
             edgeRef.on('properties', function(error, ref, vSnap) {
               throwIfError(error);
-              //edgeRef.off(); this is now done on setRoom
+              //edgeRef.off(); this is done on setRoom's removeListener
               var updated = false;
               var thisTime = getTime(), theirTime = vSnap.properties().time;
               $rootScope.users.forEach(function(each){
@@ -126,7 +136,7 @@
                   time: theirTime
                 });
               }
-              $rootScope.$safeApply();
+              $rootScope.safeApply();
             });
           },
           edge_removed : function (error, edgeRef, edgeSnap) {
@@ -156,50 +166,68 @@
       };
 
 
-      var updateList = function(name, id){
+      function updateList(name, id){
         $rootScope.rooms.push({name: name, id: id});
-        $rootScope.$safeApply();
+        $rootScope.safeApply();
       };
 
-      var throwIfError = function(error) {
-        if(error) throw Error;
+      function throwIfError(error) {
+        if(error){
+          throw Error;
+        }
       }
 
-      var createRoom = function(name){
+      function createRoom(name){
         var roomID = Appbase.uuid();
         var roomRef = Appbase.create('room', roomID);
-        roomRef.setData({name: name}, function(){
-          roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', function(){
-            roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', function(){
-              currentRoom = false;
-              mainRef.setEdge(roomRef, roomID, throwIfError);
-            });
-          });
-        });
-      }
 
-      var encodeKey = function(key, userUUID) {
-        return key.toString() + '_' + userUUID + (myColor!== undefined? '_' + myColor + '_' + myName : '');
-      }
+        async.parallel([
+          setRoomData,
+          setRoomUsers,
+          setRoomKeys
+        ], callback );
 
-      var decodeKey = function(edgeName) {
-        edgeName = edgeName.split('_');
-        return {key: parseInt(edgeName[0]), userUUID: edgeName[1], color: edgeName[2], name: edgeName[3]};
-      }
-
-      createUser(username, randomColor);
-      $rootScope.Appbase = {
-        getCurrentRoom: function(){
-          return currentRoom
-        },
-        pushToAppbase: function(key){
-          keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
-        },
-        createRoom: function(name){
-          createRoom(name);
+        function setRoomData(callback){
+          roomRef.setData({name: name}, callback);
         }
-      };
+        function setRoomUsers(callback){
+          roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'users', callback);
+        }
+        function setRoomKeys(callback){
+          roomRef.setEdge(Appbase.create('misc', Appbase.uuid()), 'keys', callback);
+        }
+        function callback(error){
+          throwIfError(error);
+          currentRoom = false;
+          mainRef.setEdge(roomRef, roomID, throwIfError);
+        }
+
+      }
+
+      function encodeKey(key, userUUID) {
+        return key.toString()
+          + '_' + userUUID
+          + (myColor!== undefined? '_' + myColor + '_' + myName : '')
+          + '_' + Appbase.uuid();
+      }
+
+      function decodeKey(edgeName) {
+        edgeName = edgeName.split('_');
+        return {
+          key: parseInt(edgeName[0]),
+          userUUID: edgeName[1],
+          color: edgeName[2],
+          name: edgeName[3],
+          keyuuid: edgeName[4]
+        };
+      }
+
+      function getTime(){
+        var retVal = new Date();
+        return retVal.valueOf();
+      }
+
     };
-  });
+  }
 
 })();

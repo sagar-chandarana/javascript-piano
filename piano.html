@@ -1,6 +1,6 @@
 <div class="col-md-offset-1 col-md-10">
-    <div class="users" ng-controller="UsersCtrl">
-        <span ng-repeat="user in users">
+    <div class="users" ng-controller="UsersCtrl as users">
+        <span ng-repeat="user in users.users">
             <span class="badge" color="user.color">&nbsp;</span>
             <span ng-bind="user.name"></span>
         </span>
