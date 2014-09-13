@@ -33,19 +33,21 @@
                         <div class="col-md-offset-5 col-md-2 grid login"
                              ng-controller="LoginCtrl as login"
                              ng-show="!util.currentRoom">
-                            <div class="form-group">
-                                <input type="text"
-                                   ng-model="username"
-                                   ng-disabled="login.logging"
-                                   class="form-control" /> 
-                            </div>
-                            <div class="form-group">
-                                <button ng-click="login.setUser(username)"
-                                        class="form-control btn btn-danger" 
-                                        ng-class="{'disabled':login.logging}">
-                                    Come on in!
-                                </button>
-                            </div>
+                            <form ng-submit="login.setUser(username)">
+                                <div class="form-group">
+                                    <input type="text"
+                                       ng-model="username"
+                                       ng-disabled="login.logging"
+                                       placeholder="Name"
+                                       class="form-control" /> 
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit"
+                                            class="form-control btn btn-danger" 
+                                            ng-class="{'disabled':login.logging}"
+                                            value="Come on in!" />
+                                </div>
+                            </form>
                         </div>
 
                         <ng-include ng-show="util.currentRoom" src="'views/piano.html'"></ng-include>
