@@ -15,7 +15,7 @@
     .factory('AppbaseFactory', appbase);
 
 
-  function appbase($rootScope, $interval, $location){
+  function appbase($rootScope, $interval, $location, $log){
     return function(username, myColor){
       Appbase.credentials("piano", "a659f26b2eabb4985ae104ddcc43155d");
       var namespace = 'pianoapp/piano/';
@@ -26,78 +26,11 @@
         currentRoom: currentRoom,
         pushToAppbase: function(key){
           keysRef.setEdge(keysRef, encodeKey(key, userUUID), throwIfError);
+          console.log('pushed')
         },
         createRoom: function(name){
           createRoom(name);
         }
-      };
-      createUser(username, myColor);
-
-      function createUser(name, color){
-        userUUID = Appbase.uuid();
-        userRef = Appbase.create('user', userUUID);
-        userRef.setData({name: name, color: color, time: getTime()}, throwIfError);
-
-        mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
-          var handler = edgeRef.on('properties', function(error, ref, vSnap){
-            edgeRef.off(handler);
-            updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
-            if(!currentRoom) {
-              setRoom(edgeRef);
-            }
-            //set user's room when first ran and when new room is created
-          });
-        });
-
-        $(window).bind('beforeunload', events.window); // remove user if tab closes
-      }
-
-      function setRoom(room){
-        var newRoom = room.path().replace(namespace, '');
-        if(newRoom === currentRoom) {
-          return; // No need to switch, inside the room.
-        } else {
-          currentRoom = newRoom;
-        }
-        
-        // Check if it's the first run to set room to hash, or if it's not the first remove listeners
-        if(!removeListeners){
-          // first run, check for hash
-          if($location.hash()) {
-            currentRoom = $location.hash().substring(1);
-            room = Appbase.ref(namespace + currentRoom);
-          }
-        } else {
-          removeListeners();
-        }
-
-        $location.hash(currentRoom);
-
-        keysRef = Appbase.ref(room.path() + '/keys');
-        usersRef = Appbase.ref(room.path() + '/users');
-
-        // set users edge to yourself. you were already removed from the room.
-        // when it's set, grab users list.
-        // This is done after listeners are called off.
-        usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
-        usersRef.setEdge(userRef, userUUID, throwIfError); //Register the user inside the room
-        keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
-        usersRef.on('edge_removed', events.usersRef.edge_removed, true);
-        
-        var interval = $interval(events.timePolling.update, events.timePolling.interval);
-        $rootScope.Appbase.currentRoom = currentRoom;
-
-        removeListeners = function(){
-          $rootScope.users = [];
-          $interval.cancel(interval);
-          events.usersRef.usersPropRefs.forEach(function(each){
-            each.off();
-          });
-          events.usersRef.usersPropRefs = [];
-          usersRef.removeEdge(userUUID);
-          keysRef.off();
-          usersRef.off();
-        };
       };
 
       var events = {
@@ -105,6 +38,7 @@
           edge_added : function (error, edgeRef, edgeSnap) {
             throwIfError(error);
             var keyObj = decodeKey(edgeSnap.name());
+            console.log(edgeRef.path());
             //ignore if key is from this user
             if(userUUID !== keyObj.userUUID) {
               $rootScope.Piano.playKeyInTheView(keyObj.key, keyObj.color, keyObj.name);
@@ -153,10 +87,11 @@
           return returnValue;
         },
         timePolling : {
-          interval : 60000, // 1 minute
+          interval : 30000, // 30 seconds
           timeout : 600000, // 10 minutes
           update : function(){
             var now = getTime();
+            $log.log('Updating time to ', now);
             userRef.setData({time: now});
             $rootScope.users = $rootScope.users.filter(function(each){
               return each.time > now - events.timePolling.timeout;
@@ -165,6 +100,74 @@
         }
       };
 
+      createUser(username, myColor);
+
+      function createUser(name, color){
+        userUUID = Appbase.uuid();
+        userRef = Appbase.create('user', userUUID);
+        userRef.setData({name: name, color: color, time: getTime()}, throwIfError);
+
+        mainRef.on('edge_added', function(error, edgeRef, edgeSnap){ //new room
+          var handler = edgeRef.on('properties', function(error, ref, vSnap){
+            edgeRef.off(handler);
+            updateList(vSnap.properties().name, edgeSnap.name()); //add the room to the list
+            if(!currentRoom) {
+              setRoom(edgeRef);
+            }
+            //set user's room when first ran and when new room is created
+          });
+        });
+
+        $(window).bind('beforeunload', events.window); // remove user if tab closes
+      }
+
+      function setRoom(room){
+        var newRoom = room.path().replace(namespace, '');
+        if(newRoom === currentRoom) {
+          return; // No need to switch, inside the room.
+        } else {
+          currentRoom = newRoom;
+        }
+        
+        // Check if it's the first run to set room to hash, or if it's not the first remove listeners
+        if(!removeListeners){
+          // first run, check for hash
+          if($location.hash()) {
+            currentRoom = $location.hash();
+            room = Appbase.ref(namespace + currentRoom);
+          }
+        } else {
+          removeListeners();
+        }
+
+        $location.hash(currentRoom);
+
+        keysRef = Appbase.ref(room.path() + '/keys');
+        usersRef = Appbase.ref(room.path() + '/users');
+
+        // set users edge to yourself. you were already removed from the room.
+        // when it's set, grab users list.
+        // This is done after listeners are called off.
+        usersRef.on('edge_added', events.usersRef.edge_added); //Listening for users
+        usersRef.setEdge(userRef, userUUID, throwIfError); //Register the user inside the room
+        keysRef.on('edge_added', events.keyRef.edge_added, true); //Listening for keys from Appbase
+        usersRef.on('edge_removed', events.usersRef.edge_removed, true);
+        
+        var interval = $interval(events.timePolling.update, events.timePolling.interval);
+        $rootScope.Appbase.currentRoom = currentRoom;
+
+        removeListeners = function(){
+          $rootScope.users = [];
+          $interval.cancel(interval);
+          events.usersRef.usersPropRefs.forEach(function(each){
+            each.off();
+          });
+          events.usersRef.usersPropRefs = [];
+          usersRef.removeEdge(userUUID);
+          keysRef.off();
+          usersRef.off();
+        };
+      };
 
       function updateList(name, id){
         $rootScope.rooms.push({name: name, id: id});
@@ -207,7 +210,7 @@
       function encodeKey(key, userUUID) {
         return key.toString()
           + '_' + userUUID
-          + (myColor!== undefined? '_' + myColor + '_' + myName : '')
+          + (myColor!== undefined? '_' + myColor + '_' + username : '')
           + '_' + Appbase.uuid();
       }
 

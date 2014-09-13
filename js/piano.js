@@ -11,7 +11,7 @@
     .factory('PianoFactory', pianoFactory);
 
 
-  function pianoFactory($rootScope, PianoClass){
+  function pianoFactory($rootScope, PianoGenerator){
     return function(color){
       var myColor = color;
       var colors = {};
@@ -21,12 +21,11 @@
         playKeyInTheView: playKeyInTheView
       };
 
-      //Mouse and keyboard events call below function.
-      var myColor = color;
-      
+      //Mouse and keyboard events call below function.      
       function triggerKey(key) { //mnvr
         playKeyInTheView(key, myColor);
         $rootScope.Appbase.pushToAppbase(key);
+        console.log(key)
       }
 
       function playKeyInTheView(key, color) {
@@ -41,7 +40,7 @@
     }
   }
 
-  function pianoClass(){
+  function pianoGenerator(){
     return function(triggerKey, getColor){
       //
       // Setup keys!

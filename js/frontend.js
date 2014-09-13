@@ -18,7 +18,7 @@
 	      if(scope.color) element.css('background-color', scope.color);
 	    }
 	  };
-	});
+	};
 
 	function utilCtrl($rootScope){
     var vm = this;
@@ -32,11 +32,12 @@
          necessary because the async call happens outside of Angular */
     }
 
-  });
+  }
 
 	function loginCtrl(PianoFactory, AppbaseFactory){
     var vm = this;
-    vm.login = login;
+    var color = randomColor();
+    vm.setUser = setUser;
     vm.logged = false;
 
 		function randomColor() {
@@ -47,15 +48,15 @@
 
 		function setUser(username){
 			if(username){
-        Piano(randomColor);
-				AppbaseFactory(username, randomColor);
+        PianoFactory(color);
+				AppbaseFactory(username, color);
         vm.logged = true;
 			}
 		}
 
 	}
 
-  function usersCtrl(){
+  function usersCtrl($rootScope){
     var vm = this;
     vm.users = $rootScope.users;
     $rootScope.$watch('users', updateUsers);
