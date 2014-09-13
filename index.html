@@ -9,58 +9,52 @@
         <link rel="image_src" href="http://mrcoles.com/media/img/piano-visual-mode.png" />
         
         <script src="js/lib/jquery-1.7.1.min.js"></script>
-        <script src="js/angular.js"></script>
-        <script src="appbase.js"></script>
+        <script src="js/lib/angular.js"></script>
+        <script src="js/lib/async.js"></script>
+        <script src="js/lib/appbase.js"></script>
+        <script src="js/lib/audio.js"></script>
 
+        <script src="js/app.js"></script>
         <script src="js/backend.js"></script>
         <script src="js/frontend.js"></script>
-        <script src="js/audio.js"></script>
         <script src="js/piano.js"></script>
+
+        <script type="text/javascript">var switchTo5x=true;</script>
+        <script type="text/javascript" src="http://w.sharethis.com/button/buttons.js"></script>
+        <script type="text/javascript">stLight.options({publisher: "ur-b67229b-6449-8faf-5da6-adf53e518b92", doNotHash: true, doNotCopy: false, hashAddressBar: false});</script>
     </head>
     <body class="container-fluid">
-        <div class="row wrapper" ng-controller="PianoCtrl">
-            <div class="col-md-10 grid">
-                <!-- <div class="pull-right">
-                    <a href="https://twitter.com/share" class="twitter-share-button" data-via="appbaseio" data-size="large">Tweet</a>
-                    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-                </div> -->
-                
+        <div class="row wrapper" ng-controller="UtilCtrl as util">
+            <div class="col-md-10 grid" ng-class="{'col-md-offset-1':!util.currentRoom}">
                 <div class="container-fluid">
                     <div class="row">
-                        <img class="col-md-offset-4 col-md-4 grid" src="img/logo.png" />
-                        <div class="col-md-offset-1 col-md-10">
-                            <div class="users">
-                                <span ng-repeat="user in users">
-                                    <span class="badge" color="user.color">&nbsp;</span>
-                                    <span ng-bind="user.name"></span>
-                                </span>
-                            </div>
+                        <div class="col-md-offset-4 col-md-4 grid logo" >
                         </div>
-                        <div class="col-md-12 grid">
-                            <div class="piano-body">
-                                <div id="piano"></div>
-                                <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
-                            </div>
+                        <div class="col-md-offset-5 col-md-2 grid login"
+                             ng-controller="LoginCtrl as login"
+                             ng-show="!util.currentRoom">
+                            <form ng-submit="login.setUser(username)">
+                                <div class="form-group">
+                                    <input type="text"
+                                       ng-model="username"
+                                       ng-disabled="login.logging"
+                                       placeholder="Name"
+                                       class="form-control" /> 
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit"
+                                            class="form-control btn btn-danger" 
+                                            ng-class="{'disabled':login.logging}"
+                                            value="Come on in!" />
+                                </div>
+                            </form>
                         </div>
+
+                        <ng-include ng-show="util.currentRoom" src="'views/piano.html'"></ng-include>
                     </div>
                 </div>
             </div>
-            <div class="col-md-2 grid sidebar">
-              <div>
-                  <ul class="list-group room">
-                      <li class="list-group-item active">
-                        Rooms
-                        <span id="addRoom" ng-click="addRoom()" class="badge">+</span>
-                      </li>
-                      <li ng-repeat="room in rooms"
-                          class="list-group-item"
-                          ng-bind="room.name"
-                          ng-click="roomClick(room.id)"
-                          ng-class="{'selected' : room.id === currentRoom}">
-                      </li>
-                  </ul>
-                </div>
-            </div>
+            <ng-include ng-show="util.currentRoom" src="'views/sidebar.html'"></ng-include>
         </div>
     </body>
 </html>
