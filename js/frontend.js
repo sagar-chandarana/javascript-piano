@@ -18,7 +18,6 @@
 
     function updateKeyCount(keyCount){
       vm.keyCount = keyCount;
-      console.log("update keyCount called.");
     }
   }
 
