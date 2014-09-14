@@ -27,8 +27,12 @@
     <div class="row wrapper" ng-controller="UtilCtrl as util">
       <div class="col-md-10 grid" ng-class="{'col-md-offset-1':!util.currentRoom}">
         <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-offset-4 col-md-4 grid logo" >
+          <div class="row" ng-controller="keyCtrl as keyCount">
+            <div class="col-md-4" ng-show="keyCount.keyCount !== 0" style="font-size:24px;margin-top:100px;color:#f33;padding-left:30px;">
+                <span ng-bind="keyCount.keyCount+'+'"></span>
+                <span style="font-size:18px;color:#999"> <em>keys played</em></span>
+            </div>
+            <div class="col-md-4 grid logo" ng-class="(keyCount.keyCount===0)?'col-md-offset-4':''">
             </div>
             <div class="col-md-offset-5 col-md-2 grid login"
               ng-controller="LoginCtrl as login"

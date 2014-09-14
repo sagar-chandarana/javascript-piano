@@ -2,6 +2,7 @@
 
   angular
     .module('pianoApp')
+    .controller('keyCtrl', keyCtrl)
     .controller('UtilCtrl', utilCtrl)
     .controller('LoginCtrl', loginCtrl)
     .controller('UsersCtrl', usersCtrl)
@@ -10,6 +11,16 @@
     .directive('canvas', canvas);
 
   
+  function keyCtrl($rootScope){
+    var vm = this;
+    vm.keyCount = $rootScope.keyCount;
+    $rootScope.$watch('keyCount', updateKeyCount);
+
+    function updateKeyCount(keyCount){
+      vm.keyCount = keyCount;
+      console.log("update keyCount called.");
+    }
+  }
 
   function utilCtrl($rootScope){
     var vm = this;
@@ -22,7 +33,6 @@
       /* This updates the highlighted room in the list,
          necessary because the async call happens outside of Angular */
     }
-
   }
 
   function loginCtrl(PianoFactory, AppbaseFactory){
@@ -46,7 +56,6 @@
         vm.logged = true;
       }
     }
-
   }
 
   function usersCtrl($rootScope){

@@ -16,6 +16,7 @@
       var namespace = 'pianoapp/piano/';
       var mainRef = Appbase.ref(namespace);
       var currentRoom, removeListeners, keysRef, usersRef, userRef, userUUID, createdRoom;
+      var keycountRef = Appbase.create('meta', 'keycount');
 
       $rootScope.Appbase = {
         currentRoom: currentRoom,
@@ -28,6 +29,13 @@
           setRoom(room);
         }
       };
+
+      keycountRef.on('properties', function(error, ref, vSnap) {
+        throwIfError(error);
+        $rootScope.keyCount = vSnap.properties().count;
+        localStorage.setItem("keyCount", $rootScope.keyCount);
+        $rootScope.safeApply();
+      });
 
       var events = {
         keyRef : {
@@ -83,8 +91,8 @@
           return returnValue;
         },
         timePolling : {
-          interval : 30000, // 30 seconds
-          timeout : 600000, // 10 minutes
+          interval : 10000, // 10 seconds
+          timeout : 20000, // 20 seconds
           update : function(){
             var now = getTime();
             userRef.setData({time: now});
@@ -206,7 +214,6 @@
           currentRoom = false;
           mainRef.setEdge(roomRef, roomID, throwIfError);
         }
-
       }
 
       function encodeKey(key) {
@@ -233,9 +240,12 @@
 
       function pushToAppbase(key){
         keysRef.setEdge(keysRef, encodeKey(key), throwIfError);
+        keycountRef.commitData(function(properties) {
+          properties.count = (properties.count+1) || 1;
+          return properties;
+        });
       }
 
     };
   }
-
 })();
