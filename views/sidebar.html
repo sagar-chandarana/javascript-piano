@@ -1,16 +1,16 @@
 <div class="col-md-2 grid sidebar">
   <div ng-controller="RoomsCtrl as rooms">
-      <ul class="list-group room" ng-show="util.currentRoom">
-        <li class="list-group-item active">
-          Rooms
-          <span ng-click="rooms.createRoom()" class="addRoom badge">+</span>
-        </li>
-        <li ng-repeat="room in rooms.rooms"
-            class="list-group-item"
-            ng-bind="room.name"
-            ng-click="rooms.switchRoom(room.id)"
-            ng-class="{'selected' : room.id === util.currentRoom}">
-        </li>
-      </ul>
-    </div>
+    <ul class="list-group room" ng-show="util.currentRoom">
+      <li class="list-group-item active">
+        Rooms
+        <span ng-click="rooms.createRoom()" class="addRoom badge">+</span>
+      </li>
+      <li ng-repeat="room in rooms.rooms"
+          class="list-group-item"
+          ng-bind="room.name"
+          ng-click="rooms.switchRoom(room.id)"
+          ng-class="{'selected' : room.id === util.currentRoom}">
+      </li>
+    </ul>
+  </div>
 </div>
