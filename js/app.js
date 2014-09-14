@@ -1,6 +1,6 @@
 (function(){
 
-	angular
+  angular
     .module('pianoApp', [])
     .run(initialConfig);
 

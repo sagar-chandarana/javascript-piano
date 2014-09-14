@@ -1,6 +1,6 @@
 (function(){
 
-	angular
+  angular
     .module('pianoApp')
     .controller('UtilCtrl', utilCtrl)
     .controller('LoginCtrl', loginCtrl)
@@ -11,7 +11,7 @@
 
   
 
-	function utilCtrl($rootScope){
+  function utilCtrl($rootScope){
     var vm = this;
     vm.currentRoom = $rootScope.Appbase.currentRoom;
     $rootScope.$watch('Appbase.currentRoom', updateRoom);
@@ -25,29 +25,29 @@
 
   }
 
-	function loginCtrl(PianoFactory, AppbaseFactory){
+  function loginCtrl(PianoFactory, AppbaseFactory){
     var vm = this;
     var color = randomColor();
     vm.setUser = setUser;
     vm.logging = false;
     vm.logged = false;
 
-		function randomColor() {
-			var colors = 'f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'
-		               .split(' ');
-		 	return '#' + colors[Math.floor(Math.random()*colors.length)];
-		}
+    function randomColor() {
+      var colors = 'f33 33f 3f3 ff3 f3f 3ff 000 ff6347 6a5acd daa520 d2691e ff8c00 00ced1 dc143c ff1493'
+                   .split(' ');
+      return '#' + colors[Math.floor(Math.random()*colors.length)];
+    }
 
-		function setUser(username){
-			if(username){
+    function setUser(username){
+      if(username){
         vm.logging = true;
         PianoFactory(color);
-				AppbaseFactory(username, color);
+        AppbaseFactory(username, color);
         vm.logged = true;
-			}
-		}
+      }
+    }
 
-	}
+  }
 
   function usersCtrl($rootScope){
     var vm = this;
