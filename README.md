@@ -1,7 +1,7 @@
 JAM with friends
 ================
 
-JAM with friends is a live piano you can play with your friends built on [Appbase](http://appbase.io).
+JAM with friends is a live piano you can play with your friends built on [Appbase](http://appbase.io). Read the blog post on how it works [here](http://news.appbase.io/posts/233094-jam-with-friends).
 
 ![Jam with friends on Appbase](http://user-image.logdown.io/user/9394/blog/9216/post/233094/xfXM0DUXQpqm1jz8QAOj_Selection_124.png)
 
