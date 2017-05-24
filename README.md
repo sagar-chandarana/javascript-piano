@@ -27,3 +27,8 @@ You can also use this with Node.js runtime, and keep your app secret *secret* fr
 jam-with-friends is freely distributable under MIT License.
 
 Credits: See the [HTML5 JavaScript Piano](http://mrcoles.com/piano/) live.
+
+
+## Note
+
+"WITH FRIENDS" is a registered trademark of Zynga Inc. **jam-with-friends** is not related in any way to any of Zynga products.
