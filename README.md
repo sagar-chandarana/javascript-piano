@@ -1,7 +1,7 @@
-JAM with friends
+JAM with appbase
 ================
 
-JAM with friends is a live piano you can play with your friends built on [Appbase](http://appbase.io). Read the blog post on how it works [here](http://news.appbase.io/posts/233094-jam-with-friends).
+JAM with appbase is a live piano you can play with your friends built on [Appbase](http://appbase.io). Read the blog post on how it works [here](http://news.appbase.io/posts/233094-jam-with-friends).
 
 ![Jam with friends on Appbase](http://user-image.logdown.io/user/9394/blog/9216/post/233094/xfXM0DUXQpqm1jz8QAOj_Selection_124.png)
 
@@ -27,8 +27,3 @@ You can also use this with Node.js runtime, and keep your app secret *secret* fr
 jam-with-friends is freely distributable under MIT License.
 
 Credits: See the [HTML5 JavaScript Piano](http://mrcoles.com/piano/) live.
-
-
-## Note
-
-"WITH FRIENDS" is a registered trademark of Zynga Inc. **jam-with-friends** is not related in any way to any of Zynga products.
