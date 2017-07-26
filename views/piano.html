@@ -1,0 +1,25 @@
+<div class="col-md-offset-1 col-md-10">
+  <div class="social">
+    <span class='st_facebook_large' displayText='Facebook'></span>
+    <span class='st_twitter_large' displayText='Tweet'></span>
+    <span class='st_pinterest_large' displayText='Pinterest'></span>
+    <span class='st_googleplus_large' displayText='Google +'></span>
+    <span class='st_whatsapp_large' displayText='WhatsApp'></span>
+    <span class='st_email_large' displayText='Email'></span>
+  </div>
+  <div class="users" ng-controller="UsersCtrl as users">
+    <span ng-repeat="user in users.users">
+      <span class="badge" color="user.color">&nbsp;</span>
+      <span ng-bind="user.name"></span>
+    </span>
+  </div>
+</div>
+<div class="col-md-12 grid">
+  <div class="piano-body">
+    <div id="piano"></div>
+    <canvas>
+    <!-- Piano is dinamically included here by piano.js when instantiated by frontend.js -->
+  </div>
+  <div class="col-md-12" style="text-align:center;margin-top:30px;"><span style="margin-top:2px;"><a href="http://news.ycombinator.com/submit" data-url="http://appbaseio.github.io/jam-with-friends/" class="hn-share-button">Vote on HN</a></span>&#8226;&nbsp;<a href="http://news.appbase.io/posts/233094-jam-with-friends" target="_blank">How it works</a> &nbsp;&#8226;&nbsp; Powered by <a href="http://appbase.io" target="_blank">appbase.io</a></li></div>
+</div>
+<script src="//hnbutton.appspot.com/static/hn.min.js" async defer></script>

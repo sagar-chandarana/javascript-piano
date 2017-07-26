@@ -1,46 +1,79 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset=utf-8>
-        <title>HTML5 JavaScript Piano - with Data URIs</title>
-        <meta name="description" content="A synth piano synth that generates all of its audio files dynamically using JavaScript and data URIs. Choose from a variety of sounds styles and play with the looper, visual waveforms, and more." />
-        <link rel="stylesheet" type="text/css" href="css/piano.css" />
-        <meta property="og:image" content="http://mrcoles.com/media/img/piano-visual-mode.png">
-        <link rel="image_src" href="http://mrcoles.com/media/img/piano-visual-mode.png" />
-    </head>
-    <body>
-        <div id="content">
-            <div id="content-inner">
-                <div id="piano">
-                    <h1>Javascript Piano</h1>
-                    <div class="help show" tabindex="1">
-                        <div class="help-inner">
-                            <div id="synth-settings"></div>
-                            <div class="opts">
-                                <p><strong>Controls:</strong></p>
-                                <p>play using home row &amp; above &nbsp; /</p>
-                            </div>
-                            <div class="opts">
-                                <p><strong>Extras:</strong></p>
-                                <p class="toggle-color toggle hold">Color - c &nbsp; /</p>
-                                <p class="toggle-animate toggle">Visual mode - 8 &nbsp; /</p>
-                                <p>Help - 0</p>
-                            </div>
-                        </div>
-                    </div>
+<html ng-app="pianoApp">
+  <head>
+    <meta charset=utf-8>
+    <title>Jam with friends @appbaseio</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/piano.css" />
+    <meta property="og:image" content="http://mrcoles.com/media/img/piano-visual-mode.png">
+    <link rel="image_src" href="http://mrcoles.com/media/img/piano-visual-mode.png" />
+
+    <script src="js/lib/jquery-1.7.1.min.js"></script>
+    <script src="js/lib/angular.js"></script>
+    <script src="js/lib/async.js"></script>
+    <script src="js/lib/appbase.js"></script>
+    <script src="js/lib/audio.js"></script>
+    <script src="js/lib/bootstrap.min.js"></script>
+
+    <script src="js/app.js"></script>
+    <script src="js/backend.js"></script>
+    <script src="js/frontend.js"></script>
+    <script src="js/piano.js"></script>
+    
+    <script type="text/javascript">var switchTo5x=true;</script>
+    <script type="text/javascript" src="//w.sharethis.com/button/buttons.js"></script>
+    <script type="text/javascript">stLight.options({publisher: "ur-b67229b-6449-8faf-5da6-adf53e518b92", doNotHash: true, doNotCopy: false, hashAddressBar: false});</script>
+  </head>
+  <body class="container-fluid" ng-controller="keyCtrl as keyCount">
+    <a href="https://github.com/appbaseio/jam-with-friends" target="_blank;"><img style="position: absolute; top: 0; left: 0; border: 0; z-index: 1030;" src="https://camo.githubusercontent.com/c6625ac1f3ee0a12250227cf83ce904423abf351/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f6c6566745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_left_gray_6d6d6d.png"></a>
+    <div class="alert alert-info fade in" role="alert" ng-show="keyCount.keyCount !== 0" style="position:absolute;top:5px;left:33%;z-index:120;font-size:15px;padding:5px;">
+      <button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+      <strong>Controls:</strong> play using home row & above row.&nbsp;&nbsp;
+    </div>
+    <div class="row wrapper" ng-controller="UtilCtrl as util">
+      <div class="col-md-10 grid" ng-class="{'col-md-offset-1':!util.currentRoom}">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-4" ng-show="keyCount.keyCount !== 0" style="font-size:24px;margin-top:100px;color:#f33;padding-left:30px;text-align:center;">
+                <span ng-bind="keyCount.keyCount+'+'"></span>
+                <span style="font-size:18px;color:#999"> <em>keys played</em></span>
+            </div>
+            <div class="col-md-4 grid logo" ng-class="(keyCount.keyCount===0)?'col-md-offset-4':''">
+            </div>
+            <div class="col-md-offset-5 col-md-2 grid login"
+              ng-controller="LoginCtrl as login"
+              ng-show="!util.currentRoom">
+              <form ng-submit="login.setUser(username)">
+                <div class="form-group">
+                  <input type="text"
+                    ng-model="username"
+                    ng-disabled="login.logging"
+                    placeholder="Name"
+                    class="form-control" /> 
                 </div>
+                <div class="form-group">
+                  <input type="submit"
+                    class="form-control btn btn-danger" 
+                    ng-class="{'disabled':login.logging}"
+                    value="Join the band!" />
+                </div>
+              </form>
             </div>
-            <div style="color: ">
-                <h3 style="padding-left:10px;">Users Live</h3>
-                <ul id="usernames" style="list-style:none;">
-                </ul>
-            </div>
+            <ng-include ng-show="util.currentRoom" src="'views/piano.html'"></ng-include>
+          </div>
         </div>
-        <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
-        </div>
-        <script src="js/lib/jquery-1.7.1.min.js"></script>
-        <script src="js/lib/appbase.min.js"></script>
-        <script src="js/audio.js"></script>
-        <script src="js/piano.js"></script>
-    </body>
+      </div>
+      <ng-include ng-show="util.currentRoom" src="'views/sidebar.html'"></ng-include>
+    </div>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-54082612-4', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
 </html>
